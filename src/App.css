@@ -146,6 +146,68 @@ main p {
   letter-spacing: 1px; /* Espaciado entre letras */
 }
 
+/* Menú */
+#menu {
+  padding: 3rem;
+  background-color: #ffe6e6; /* Fondo rosa claro */
+}
+
+#menu h2 {
+  text-align: center;
+  color: #ff4d4d; /* Rojo vibrante */
+  margin-bottom: 2rem;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.menu-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.menu-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px ; /* Bordes redondeados en la parte superior */
+}
+
+.menu-divider {
+  width: 50%; /* Ajusta el ancho de la barra */
+  height: 4px; /* Altura de la barra */
+  background-color: #ff4d4d; /* Rojo vibrante */
+  margin: 0.5rem auto; /* Centra la barra */
+}
+
+.menu-card h4 {
+  margin: 1rem 0 0.5rem;
+  color: #ff4d4d;
+}
+
+.menu-card p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.menu-price {
+  font-weight: bold;
+  color: #ff4d4d;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header nav ul {
