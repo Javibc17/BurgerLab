@@ -54,6 +54,16 @@ body {
   font-size: 37px;
 }
 
+.nav-links a {
+  color: #f4c2c2; /* Color rosa palo */
+  text-decoration: none; /* Quita el subrayado */
+  font-size: inherit; /* Usa el tamaño de fuente heredado */
+}
+
+.nav-links a:hover {
+  text-decoration: underline; /* Subrayado al pasar el cursor */
+}
+
 .content {
   display: flex;
   justify-content: center;
@@ -169,4 +179,93 @@ body {
 .menu-item-price {
   font-weight: bold;
   color: #333;
+}
+
+.footer {
+  background-color: #f4c2c2; /* Fondo en rosa palo */
+  color: #e63946; /* Texto en rojo */
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 20px;
+  width: 100%;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column; /* Asegura que los elementos estén en columna */
+  justify-content: space-between; /* Distribuye el contenido */
+  min-height: 200px; /* Altura mínima del footer */
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px;
+  align-items: flex-start; /* Alinea las secciones al inicio */
+  flex-grow: 1; /* Permite que el contenido crezca */
+}
+
+.footer-section {
+  flex: 1 1 200px; /* Ajusta el ancho mínimo */
+  margin: 10px;
+}
+
+.footer-section h4 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #e63946; /* Títulos en rojo */
+}
+
+.footer-section p,
+.footer-section ul {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin: 5px 0;
+}
+
+.footer-section ul li a {
+  color: #e63946; /* Enlaces en rojo */
+  text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+  text-decoration: none;
+  color: #333; /* Cambia a un tono más oscuro al pasar el cursor */
+}
+
+.footer-section a {
+  color: #f4c2c2;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.footer-section a:hover {
+  text-decoration: none;
+  color: #fff;
+}
+
+.footer-content a {
+  color: #e63946; /* Enlaces en rojo */
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.footer-content a:hover {
+  text-decoration: none;
+  color: #333; /* Cambia a un tono más oscuro al pasar el cursor */
+}
+
+.footer-copyright {
+  font-size: 14px;
+  color: #e63946; /* Texto en rojo */
+  width: 100%; /* Ocupa todo el ancho */
+  text-align: center; /* Centra el texto */
+  margin-top: auto; /* Empuja el copyright hacia abajo */
 }
