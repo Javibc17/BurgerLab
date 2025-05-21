@@ -1,15 +1,16 @@
+// 1. Imports
 import React from "react";
 
+// 2. Componente principal
 function Footer() {
   return (
     <footer className="footer">
       <div className="footer-content">
         <section className="footer-section">
           <h4>Información de contacto</h4>
-          <p>Dirección: Calle Ejemplo 123, Ciudad, País</p>
-          <p>Teléfono: +34 123 456 789</p>
+          <p>Teléfono: +34 622 833 777</p>
           <p>Correo: contacto@burgerlab.com</p>
-          <p>Horario: Lunes a Domingo, 12:00 - 23:00</p>
+          
         </section>
 
         <section className="footer-section">
@@ -49,4 +50,5 @@ function Footer() {
   );
 }
 
+// 3. Export
 export default Footer;
