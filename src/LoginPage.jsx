@@ -6,7 +6,7 @@ import logo from './assets/logoLetrasRojo.png';
 import eyeOff from './assets/proicons--eye-off.svg';
 import eyeOn from './assets/proicons--eye.svg';
 
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -14,10 +14,29 @@ function LoginPage({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const mensajeTimeoutRef = React.useRef();
 
   const validarEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
+
+  React.useEffect(() => {
+    if (mensaje) {
+      if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
+      mensajeTimeoutRef.current = setTimeout(() => setMensaje(""), 5000);
+    }
+    return () => {
+      if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
+    };
+  }, [mensaje]);
+
+  React.useEffect(() => {
+    if (mensajeProp) {
+      setMensaje(mensajeProp);
+      if (setMensajeProp) setMensajeProp("");
+    }
+  }, [mensajeProp, setMensajeProp]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +57,13 @@ function LoginPage({ onLogin }) {
     try {
       const res = await api.post("/login", { email, password });
       setLoading(false);
-      if (onLogin) onLogin(res.data);
+      setMensaje('¡Inicio de sesión exitoso!');
+      if (onLogin) {
+        onLogin(res.data);
+        // Guardar usuario en localStorage con id
+        localStorage.setItem('usuario', JSON.stringify(res.data));
+        alert('Inicio de sesión exitoso. ¡Bienvenido/a!');
+      }
     } catch (err) {
       setLoading(false);
       const msg = err.response?.data?.error || "Error de inicio de sesión";
@@ -66,6 +91,24 @@ function LoginPage({ onLogin }) {
         overflow: 'hidden'
       }}
     >
+      {mensaje && (
+        <div style={{
+          position: 'fixed',
+          top: 30,
+          left: 30,
+          background: '#fff',
+          color: '#e63946',
+          padding: '16px 38px',
+          borderRadius: 12,
+          fontSize: '1.2rem',
+          fontFamily: 'Chewy, system-ui',
+          fontWeight: 600,
+          zIndex: 3000,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.18)'
+        }}>
+          {mensaje}
+        </div>
+      )}
       <img src={logo} alt="Burger Lab Logo" style={{ width: 220, height: 'auto', marginBottom: 0, marginTop: 0, zIndex: 10, position: 'relative' }} />
       <div style={{
         position: 'absolute',

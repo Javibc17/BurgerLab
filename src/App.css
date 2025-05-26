@@ -326,7 +326,6 @@ body {
 .modal-price {
   font-size: 1.3rem;
   font-weight: bold;
-  margin-bottom: 18px;
 }
 .modal-desc {
   font-size: 1.1rem;
@@ -392,7 +391,6 @@ body {
 .modal-price {
   font-size: 1.3rem;
   font-weight: bold;
-  margin-bottom: 18px;
   color: #b03535;
   background: #fff3;
   padding: 4px 16px;
@@ -1110,4 +1108,111 @@ body {
   font-size: 1.1rem;
   margin-top: 18px;
   letter-spacing: 1px;
+}
+
+.crud-table-container {
+  padding: 32px 0 0 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.crud-table-title {
+  color: #222;
+  text-align: left;
+  font-size: 1.5rem;
+  font-family: inherit;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+.crud-table {
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  min-width: 340px;
+  max-width: 98vw;
+  margin: 0 auto 32px auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.crud-table th, .crud-table td {
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+  border: none;
+  text-align: left;
+}
+.crud-table th {
+  background: #fff;
+  color: #222;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-bottom: 1px solid #e0e0e0;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+.crud-table td {
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+}
+.crud-table tr:last-child td {
+  border-bottom: none;
+}
+.crud-table tbody tr:nth-child(even) {
+  background: #f7f7f7;
+}
+.crud-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+.crud-table input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+}
+.crud-table-actions {
+  display: flex;
+  gap: 8px;
+}
+.crud-table-actions button {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 18px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.crud-table-actions .edit-btn {
+  background: #ffc107;
+  color: #222;
+}
+.crud-table-actions .edit-btn:hover {
+  background: #ffb300;
+}
+.crud-table-actions .del-btn {
+  background: #e74c3c;
+  color: #fff;
+}
+.crud-table-actions .del-btn:hover {
+  background: #c0392b;
+}
+
+@media (max-width: 700px) {
+  .crud-table th, .crud-table td {
+    padding: 8px 6px;
+    font-size: 0.98rem;
+  }
+  .crud-table-title {
+    font-size: 1.1rem;
+  }
 }

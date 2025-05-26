@@ -84,18 +84,29 @@ app.post('/api/login', async (req, res) => {
 
 // Endpoint: crear producto
 app.post('/api/productos', async (req, res) => {
-  const { categoria, title, price, description, image } = req.body;
+  const { categoria, title, price, description, image, modalImage } = req.body;
   const [result] = await db.execute(
-    'INSERT INTO productos (categoria, title, price, description, image) VALUES (?, ?, ?, ?, ?)',
-    [categoria, title, price, description, image]
+    'INSERT INTO productos (categoria, title, price, description, image, modalImage) VALUES (?, ?, ?, ?, ?, ?)',
+    [categoria, title, price, description, image, modalImage]
   );
-  res.status(201).json({ id: result.insertId, categoria, title, price, description, image });
+  res.status(201).json({ id: result.insertId, categoria, title, price, description, image, modalImage });
 });
 
 // Endpoint: listar productos
 app.get('/api/productos', async (req, res) => {
   const [rows] = await db.execute('SELECT * FROM productos');
   res.json(rows);
+});
+
+// Endpoint: actualizar producto
+app.put('/api/productos/:id', async (req, res) => {
+  const { categoria, title, price, description, image, modalImage } = req.body;
+  const { id } = req.params;
+  await db.execute(
+    'UPDATE productos SET categoria=?, title=?, price=?, description=?, image=?, modalImage=? WHERE id=?',
+    [categoria, title, price, description, image, modalImage, id]
+  );
+  res.json({ id, categoria, title, price, description, image, modalImage });
 });
 
 // Endpoint: crear ticket (pedido)

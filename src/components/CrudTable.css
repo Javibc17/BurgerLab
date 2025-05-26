@@ -1,0 +1,555 @@
+/* CRUD Table Modern Styles */
+.crud-table-container {
+  padding: 32px 0 0 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.crud-table-title {
+  color: #222;
+  text-align: left;
+  font-size: 1.5rem;
+  font-family: inherit;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+.crud-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Chewy', system-ui;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  min-width: 340px;
+  max-width: 98vw;
+  margin: 0 auto 32px auto;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.crud-table th, .crud-table td {
+  padding: 12px;
+  text-align: left;
+  font-weight: normal;
+  color: #000;
+  border-bottom: 1px solid #ddd;
+  background: #fff;
+  font-size: 1rem;
+  font-family: 'Chewy', system-ui !important;
+}
+.crud-table th {
+  color: #000;
+  font-weight: normal;
+  background: #fff;
+}
+.crud-table td {
+  color: #444;
+  font-weight: normal;
+}
+.crud-table tr:nth-child(4) {
+  background-color: #f2f2f2;
+}
+.crud-table tbody tr:nth-child(even) {
+  background: #f7f7f7;
+}
+.crud-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+.crud-table input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+}
+.crud-table-actions {
+  display: flex;
+  gap: 8px;
+  height: 100%;
+}
+.crud-table-actions button {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 18px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.crud-table-actions .edit-btn, .btnEditar {
+  background-color: #f4b400;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 5px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.18s, color 0.18s;
+}
+/* Guardar en verde cuando está en modo edición o añadiendo */
+.crud-table-actions .edit-btn.save-mode {
+  background-color: #43b96a !important;
+  color: #fff !important;
+}
+.crud-table-actions .edit-btn.save-mode:hover {
+  background-color: #2e8b57 !important;
+}
+.crud-table-actions .del-btn, .btnBorrar {
+  background-color: #db4437;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.18s, color 0.18s;
+}
+.crud-table-actions .del-btn:hover, .btnBorrar:hover {
+  background-color: #c23321;
+}
+.crud-table-large {
+  min-width: 900px;
+  max-width: 100%;
+}
+.crud-table-pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 18px 0 0 0;
+  gap: 12px;
+  padding: 0 24px 12px 24px; /* Add horizontal and bottom padding for spacing */
+}
+.crud-table-pagination {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
+}
+.crud-table-pagination-info {
+  flex: 1;
+  text-align: center;
+  color: #222;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+}
+.crud-table-pagination button {
+  background: #fff;
+  color: #222;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 4px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
+.crud-table-pagination button.active,
+.crud-table-pagination button:hover:not(:disabled) {
+  background: #ffc107;
+  color: #222;
+  border: 1.5px solid #ffc107;
+}
+.crud-table-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.crud-table-header-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 8px;
+  min-width: 340px;
+  max-width: 98vw;
+}
+.crud-add-btn {
+  background: #43b96a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.15rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(67,185,106,0.10);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  margin-bottom: 8px;
+  margin-right: 0;
+  margin-left: auto;
+  letter-spacing: 0.5px;
+}
+.crud-add-btn::after {
+  content: attr(data-label);
+  margin-left: 8px;
+  font-family: inherit;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.crud-add-btn:hover {
+  background: #2e8b57;
+  color: #fff;
+  box-shadow: 0 4px 16px #43b96a44;
+}
+
+/* Estilos para el modal de edición/añadido */
+.crud-modal-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.crud-modal {
+  background: #fff;
+  border-radius: 18px;
+  min-width: 280px;
+  max-width: 420px;
+  width: 98vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 32px 20px 20px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.crud-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  background: none;
+  border: none;
+  font-size: 2.2rem;
+  color: #e63946;
+  cursor: pointer;
+  z-index: 2200;
+}
+.crud-modal-title {
+  text-align: center;
+  margin: 0 0 18px 0;
+  font-family: 'Chewy', system-ui;
+  color: #e63946;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.crud-modal-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.crud-modal-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+.crud-modal-field label {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #e63946;
+  letter-spacing: 0.2px;
+  font-family: 'Chewy', system-ui;
+}
+.crud-modal-field input,
+.crud-modal-field select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #e63946;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+  margin-bottom: 2px;
+  outline: none;
+  transition: border 0.18s;
+}
+.crud-modal-field input:focus,
+.crud-modal-field select:focus {
+  border-color: #43b96a;
+}
+.crud-modal-field input.error,
+.crud-modal-field select.error {
+  border-color: #db4437;
+}
+.crud-modal-error {
+  color: #db4437;
+  font-size: 0.98rem;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+.crud-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.crud-modal-actions .edit-btn.save-mode {
+  background: #43b96a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.08rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(67,185,106,0.10);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  letter-spacing: 0.5px;
+}
+.crud-modal-actions .edit-btn.save-mode:hover {
+  background: #2e8b57;
+  color: #fff;
+  box-shadow: 0 4px 16px #43b96a44;
+}
+.crud-modal-actions .del-btn {
+  background: #fff;
+  color: #e63946;
+  border: 2px solid #e63946;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  letter-spacing: 0.5px;
+}
+.crud-modal-actions .del-btn:hover {
+  background: #e63946;
+  color: #fff;
+  border-color: #fff;
+}
+.crud-table-filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.crud-table-filter-select {
+  min-width: 120px;
+  max-width: 180px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #e63946;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+  outline: none;
+  transition: border 0.18s;
+}
+.crud-table-filter-select:focus {
+  border-color: #43b96a;
+}
+.crud-table-filter-clear {
+  background: #fff;
+  color: #e63946;
+  border: 2px solid #e63946;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  letter-spacing: 0.5px;
+}
+.crud-table-filter-clear:hover {
+  background: #e63946;
+  color: #fff;
+  border-color: #fff;
+}
+.crud-table-filter-input {
+  min-width: 120px;
+  max-width: 180px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #e63946;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #222;
+  background: #fff;
+  outline: none;
+  transition: border 0.18s;
+  margin-bottom: 2px;
+}
+.crud-table-filter-input:focus {
+  border-color: #43b96a;
+}
+.crud-table-search-btn {
+  background: #fff;
+  color: #43b96a;
+  border: 2px solid #43b96a;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  letter-spacing: 0.5px;
+}
+.crud-table-search-btn:hover {
+  background: #43b96a;
+  color: #fff;
+  border-color: #fff;
+}
+.crud-table-search-results-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.crud-table-search-results {
+  background: #fff;
+  border-radius: 18px;
+  min-width: 320px;
+  max-width: 900px;
+  width: 98vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 32px 20px 20px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.crud-table-search-results-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Chewy', system-ui;
+  color: #e63946;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.crud-table-filters-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  padding: 18px 18px 12px 18px;
+  z-index: 2000;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: modalIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.crud-table-filters-dropdown input {
+  margin-bottom: 0;
+}
+.crud-table-advanced-filters {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  padding: 18px 18px 12px 18px;
+  animation: modalIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.crud-table-advanced-filters input {
+  min-width: 120px;
+  max-width: 180px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #e63946;
+  font-size: 1rem;
+  font-family: 'Chewy', system-ui;
+  color: #222;
+  background: #fff;
+  outline: none;
+  transition: border 0.18s;
+  margin-bottom: 0;
+}
+.crud-table-advanced-filters input:focus {
+  border-color: #43b96a;
+}
+.crud-table-advanced-filters .crud-table-filter-clear {
+  background: #fff;
+  color: #e63946;
+  border: 2px solid #e63946;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  letter-spacing: 0.5px;
+}
+.crud-table-advanced-filters .crud-table-filter-clear:hover {
+  background: #e63946;
+  color: #fff;
+  border-color: #fff;
+}
+.crud-table-filter-clear-x {
+  /* Fuerza la posición y el fondo transparente */
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  right: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #e63946 !important;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+@keyframes modalIn {
+  from { transform: scale(0.85) translateY(40px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@media (max-width: 700px) {
+  .crud-table th, .crud-table td {
+    padding: 8px 6px;
+    font-size: 0.98rem;
+  }
+  .crud-table-title {
+    font-size: 1.1rem;
+  }
+}

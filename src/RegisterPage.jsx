@@ -22,6 +22,9 @@ export default function RegisterPage({ onRegister }) {
   const [checkboxError, setCheckboxError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [rol, setRol] = useState("cliente");
+  const [mensaje, setMensaje] = useState("");
+  const mensajeTimeoutRef = React.useRef();
 
   // Validaciones
   const validarEmail = (email) => {
@@ -34,6 +37,16 @@ export default function RegisterPage({ onRegister }) {
   const validarNombre = (nombre) => {
     return nombre.trim().length >= 2;
   };
+
+  React.useEffect(() => {
+    if (mensaje) {
+      if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
+      mensajeTimeoutRef.current = setTimeout(() => setMensaje(""), 5000);
+    }
+    return () => {
+      if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
+    };
+  }, [mensaje]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,12 +81,16 @@ export default function RegisterPage({ onRegister }) {
     setLoading(true);
     try {
       // Enviar la contraseña en texto plano, el backend la hashea
-      const res = await api.post("/users", { nombre, email, password, rol: "cliente" });
+      const res = await api.post("/users", { nombre, email, password, rol });
       setLoading(false);
-      if (onRegister) onRegister(res.data);
+      if (onRegister) onRegister(res.data, '¡Cuenta creada exitosamente! Ya puedes iniciar sesión.');
     } catch (err) {
       setLoading(false);
-      setError(err.response?.data?.error || "Error al crear la cuenta");
+      if (err.response?.data?.error?.toLowerCase().includes('email')) {
+        setEmailError('Este correo ya está registrado.');
+      } else {
+        setError(err.response?.data?.error || "Error al crear la cuenta");
+      }
     }
   };
 
@@ -91,6 +108,24 @@ export default function RegisterPage({ onRegister }) {
         overflow: 'hidden'
       }}
     >
+      {mensaje && (
+        <div style={{
+          position: 'fixed',
+          top: 30,
+          left: 30,
+          background: '#fff',
+          color: '#e63946',
+          padding: '16px 38px',
+          borderRadius: 12,
+          fontSize: '1.2rem',
+          fontFamily: 'Chewy, system-ui',
+          fontWeight: 600,
+          zIndex: 3000,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.18)'
+        }}>
+          {mensaje}
+        </div>
+      )}
       {/* Logo principal SIEMPRE por encima de los logos decorativos */}
       <img src={logo} alt="Burger Lab Logo" style={{ width: 220, height: 'auto', marginBottom: 0, marginTop: 0, zIndex: 10, position: 'relative' }} />
       {/* Logos decorativos de fondo con logoSolo, mucha cantidad y solo detrás del formulario, nunca detrás del logo principal */}
@@ -260,6 +295,21 @@ export default function RegisterPage({ onRegister }) {
             </button>
           </div>
           {confirmPasswordError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{confirmPasswordError}</div>}
+        </div>
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+            Rol <span style={{ color: '#e63946' }}>*</span>
+          </label>
+          <select
+            value={rol}
+            onChange={e => setRol(e.target.value)}
+            required
+            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1.5px solid #e63946", fontSize: 17, boxSizing: 'border-box', background: '#fff', color: '#e63946', fontFamily: 'Chewy, system-ui' }}
+          >
+            <option value="cliente">Cliente</option>
+            <option value="empleado">Empleado</option>
+            <option value="admin">Administrador</option>
+          </select>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'flex', alignItems: 'center', fontSize: 15 }}>

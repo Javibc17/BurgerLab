@@ -82,3 +82,4 @@ Fórmula:
     { image: tartaDelDiaImage, title: "Tarta del Día", price: "4,00 €" },
   ],
 };
+// Elimina la referencia a menuData.js, ya no se usa en la carta/menu

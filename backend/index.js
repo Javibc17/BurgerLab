@@ -5,7 +5,12 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: '*', // Permitir cualquier origen para depuración
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Configuración MySQL
@@ -126,13 +131,17 @@ app.post('/api/tickets', async (req, res) => {
 
 app.get('/api/tickets', async (req, res) => {
   try {
-    let query = 'SELECT id, usuarioId, numero, fecha, hora, productos, total FROM tickets';
+    let query = `
+      SELECT tickets.id, tickets.usuarioId, users.nombre AS usuarioNombre, tickets.numero, tickets.fecha, tickets.hora, tickets.productos, tickets.total
+      FROM tickets
+      LEFT JOIN users ON tickets.usuarioId = users.id
+    `;
     let params = [];
     if (req.query.usuarioId) {
-      query += ' WHERE usuarioId = ?';
+      query += ' WHERE tickets.usuarioId = ?';
       params.push(req.query.usuarioId);
     }
-    query += ' ORDER BY id DESC';
+    query += ' ORDER BY tickets.id DESC';
     const [rows] = await db.execute(query, params);
     // Parsear productos de JSON a objeto
     const tickets = rows.map(t => ({ ...t, productos: JSON.parse(t.productos) }));
@@ -142,7 +151,100 @@ app.get('/api/tickets', async (req, res) => {
   }
 });
 
-// Aquí puedes añadir los endpoints de tickets, reservas y productos usando MySQL si los necesitas
+// ENDPOINTS RESERVAS
+app.post('/api/reservas', async (req, res) => {
+  const { nombre, email, fecha, hora, personas, comentario, usuarioId } = req.body;
+  if (!nombre || !email || !fecha || !hora || !personas) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios para la reserva.' });
+  }
+  // Asegura que usuarioId sea null o un número válido
+  const userIdValue = usuarioId !== undefined && usuarioId !== '' ? Number(usuarioId) : null;
+  console.log('Reserva recibida:', { nombre, email, fecha, hora, personas, comentario, usuarioId });
+  try {
+    // CORREGIDO: el orden de los campos debe coincidir con la tabla (usuarioId primero)
+    const [result] = await db.execute(
+      'INSERT INTO reservas (usuarioId, nombre, email, fecha, hora, personas, comentario) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [userIdValue, nombre, email, fecha, hora, personas, comentario || '']
+    );
+    res.status(201).json({ id: result.insertId, nombre, email, fecha, hora, personas, comentario });
+  } catch (err) {
+    console.error('Error en POST /api/reservas:', err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/reservas', async (req, res) => {
+  console.log('GET /api/reservas llamado con query:', req.query); // <-- LOG INICIAL
+  try {
+    let query = 'SELECT id, nombre, email, fecha, hora, personas, comentario, usuarioId FROM reservas';
+    let params = [];
+    if (req.query.usuarioId) {
+      // Fuerza a número para evitar problemas de tipo
+      query += ' WHERE usuarioId = ?';
+      params.push(Number(req.query.usuarioId));
+      console.log('Buscando reservas para usuarioId:', Number(req.query.usuarioId));
+    }
+    query += ' ORDER BY fecha DESC, hora DESC';
+    const [rows] = await db.execute(query, params);
+    console.log('Reservas encontradas:', rows); // <-- LOG DETALLADO
+    res.json(rows);
+  } catch (err) {
+    console.error('Error en GET /api/reservas:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ENDPOINT ACTUALIZAR RESERVA
+app.put('/api/reservas/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre, email, fecha, hora, personas, comentario, usuarioId } = req.body;
+  if (!nombre || !email || !fecha || !hora || !personas) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios para la reserva.' });
+  }
+  try {
+    const [result] = await db.execute(
+      'UPDATE reservas SET nombre=?, email=?, fecha=?, hora=?, personas=?, comentario=?, usuarioId=? WHERE id=?',
+      [nombre, email, fecha, hora, personas, comentario, usuarioId, id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Reserva no encontrada.' });
+    }
+    res.json({ id, nombre, email, fecha, hora, personas, comentario, usuarioId });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ENDPOINTS CRUD PRODUCTOS
+app.post('/api/productos', async (req, res) => {
+  const { categoria, title, price, description, image, modalImage } = req.body;
+  const [result] = await db.execute(
+    'INSERT INTO productos (categoria, title, price, description, image, modalImage) VALUES (?, ?, ?, ?, ?, ?)',
+    [categoria, title, price, description, image, modalImage]
+  );
+  res.status(201).json({ id: result.insertId, categoria, title, price, description, image, modalImage });
+});
+
+app.get('/api/productos', async (req, res) => {
+  const [rows] = await db.execute('SELECT * FROM productos');
+  res.json(rows);
+});
+
+app.put('/api/productos/:id', async (req, res) => {
+  const { categoria, title, price, description, image, modalImage } = req.body;
+  const { id } = req.params;
+  await db.execute(
+    'UPDATE productos SET categoria=?, title=?, price=?, description=?, image=?, modalImage=? WHERE id=?',
+    [categoria, title, price, description, image, modalImage, id]
+  );
+  res.json({ id, categoria, title, price, description, image, modalImage });
+});
+
+app.delete('/api/productos/:id', async (req, res) => {
+  const { id } = req.params;
+  await db.execute('DELETE FROM productos WHERE id=?', [id]);
+  res.json({ success: true });
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Backend BurgerLab (MySQL) escuchando en puerto ${PORT}`));

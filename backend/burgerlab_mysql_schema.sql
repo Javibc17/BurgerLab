@@ -49,6 +49,6 @@ CREATE TABLE reservas (
   fecha DATE,
   hora TIME,
   personas INT,
-  comentario TEXT,
+  comentario VARCHAR(200),
   FOREIGN KEY (usuarioId) REFERENCES users(id)
 );

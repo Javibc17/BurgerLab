@@ -41,7 +41,42 @@ function ProductModal({ product, onClose, onAddToPedido }) {
                         {isLast && (
                           <div className="modal-bottom-row modal-bottom-row-horizontal">
                             <span className="modal-price modal-price-v2">{product.price}</span>
-                            <button className="modal-add-btn" onClick={() => onAddToPedido(product)}>Añadir al pedido</button>
+                            <button
+                              className="modal-add-btn ver-pedido-btn-destacado"
+                              style={{
+                                padding: '0 24px',
+                                fontSize: '1.4rem',
+                                borderRadius: '8px',
+                                marginLeft: 0,
+                                minWidth: 0,
+                                height: 48,
+                                alignSelf: 'center',
+                                boxShadow: 'none',
+                                background: '#f4c2c2',
+                                color: '#e63946',
+                                border: '3px solid #e63946',
+                                fontWeight: 'bold',
+                                fontFamily: 'Chewy, system-ui',
+                                transition: 'background 0.18s, color 0.18s, border 0.18s',
+                                animation: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                              onClick={() => onAddToPedido(product)}
+                              onMouseOver={e => {
+                                e.currentTarget.style.background = '#e63946';
+                                e.currentTarget.style.color = '#fff';
+                                e.currentTarget.style.borderColor = '#f4c2c2';
+                              }}
+                              onMouseOut={e => {
+                                e.currentTarget.style.background = '#f4c2c2';
+                                e.currentTarget.style.color = '#e63946';
+                                e.currentTarget.style.borderColor = '#e63946';
+                              }}
+                            >
+                              Añadir al pedido
+                            </button>
                           </div>
                         )}
                       </div>
@@ -53,13 +88,67 @@ function ProductModal({ product, onClose, onAddToPedido }) {
                         <p className="modal-desc-text">{block}</p>
                         <div className="modal-bottom-row modal-bottom-row-horizontal">
                           <span className="modal-price modal-price-v2">{product.price}</span>
-                          <button className="modal-add-btn" onClick={() => onAddToPedido(product)}>Añadir al pedido</button>
+                          <button
+                            className="modal-add-btn ver-pedido-btn-destacado"
+                            style={{
+                              padding: '0 24px',
+                              fontSize: '1.4rem',
+                              borderRadius: '8px',
+                              marginLeft: 0,
+                              minWidth: 0,
+                              height: 48,
+                              alignSelf: 'center',
+                              boxShadow: 'none',
+                              background: '#f4c2c2',
+                              color: '#e63946',
+                              border: '3px solid #e63946',
+                              fontWeight: 'bold',
+                              fontFamily: 'Chewy, system-ui',
+                              transition: 'background 0.18s, color 0.18s, border 0.18s',
+                              animation: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            onClick={() => onAddToPedido(product)}
+                            onMouseOver={e => {
+                              e.currentTarget.style.background = '#e63946';
+                              e.currentTarget.style.color = '#fff';
+                              e.currentTarget.style.borderColor = '#f4c2c2';
+                            }}
+                            onMouseOut={e => {
+                              e.currentTarget.style.background = '#f4c2c2';
+                              e.currentTarget.style.color = '#e63946';
+                              e.currentTarget.style.borderColor = '#e63946';
+                            }}
+                          >
+                            Añadir al pedido
+                          </button>
                         </div>
                       </div>
                     );
                   }
                   return <p key={i} className="modal-desc-text">{block}</p>;
                 })}
+              </div>
+            )}
+            {/* Si el producto es entrante o postre y no tiene descripción detallada, mostrar aquí */}
+            {((product && (product.categoria === 'entrantes' || product.categoria === 'postres')) && !product.description) && (
+              <div className="modal-desc-block-v2">
+                <p className="modal-desc-text" style={{ fontSize: '1.08rem', color: '#b03535', marginBottom: 12 }}>
+                  {product.categoria === 'entrantes' && (
+                    product.title === 'Patatas' ? 'Clásicas patatas fritas doradas.' :
+                    product.title === 'Ensalada' ? 'Ensalada fresca con ingredientes de temporada.' :
+                    product.title === 'Nachos' ? 'Nachos crujientes con queso y salsas.' :
+                    product.title === 'Alitas de Pollo' ? 'Alitas de pollo marinadas y crujientes.' : ''
+                  )}
+                  {product.categoria === 'postres' && (
+                    product.title === 'Tarta de Queso' ? 'Tarta cremosa de queso con base de galleta.' :
+                    product.title === 'Tarta de Pantera Rosa' ? 'Bizcocho rosa relleno de crema, sabor a infancia.' :
+                    product.title === 'Tarta de Pistacho' ? 'Tarta de pistacho suave y deliciosa.' :
+                    product.title === 'Tarta del Día' ? 'Tarta casera del día, pregúntanos por el sabor!' : ''
+                  )}
+                </p>
               </div>
             )}
           </div>
