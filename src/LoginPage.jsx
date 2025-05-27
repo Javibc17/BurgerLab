@@ -15,6 +15,8 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [mensaje, setMensaje] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null); // Nuevo estado
   const mensajeTimeoutRef = React.useRef();
 
   const validarEmail = (email) => {
@@ -57,13 +59,9 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
     try {
       const res = await api.post("/login", { email, password });
       setLoading(false);
-      setMensaje('¡Inicio de sesión exitoso!');
-      if (onLogin) {
-        onLogin(res.data);
-        // Guardar usuario en localStorage con id
-        localStorage.setItem('usuario', JSON.stringify(res.data));
-        alert('Inicio de sesión exitoso. ¡Bienvenido/a!');
-      }
+      setShowSuccessModal(true);
+      setMensaje("");
+      setPendingUser(res.data); // Guardar usuario pendiente
     } catch (err) {
       setLoading(false);
       const msg = err.response?.data?.error || "Error de inicio de sesión";
@@ -91,22 +89,54 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
         overflow: 'hidden'
       }}
     >
-      {mensaje && (
+      {showSuccessModal && (
         <div style={{
           position: 'fixed',
-          top: 30,
-          left: 30,
-          background: '#fff',
-          color: '#e63946',
-          padding: '16px 38px',
-          borderRadius: 12,
-          fontSize: '1.2rem',
-          fontFamily: 'Chewy, system-ui',
-          fontWeight: 600,
-          zIndex: 3000,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.18)'
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.35)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 4000
         }}>
-          {mensaje}
+          <div style={{
+            background: '#fff',
+            borderRadius: 16,
+            padding: '32px 36px',
+            minWidth: 320,
+            maxWidth: 420,
+            boxShadow: '0 8px 32px rgba(67,160,71,0.18)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 24
+          }}>
+            <div style={{ color: '#43a047', fontFamily: 'Chewy, system-ui', fontSize: '1.5rem', fontWeight: 700, textAlign: 'center' }}>
+              ¡Inicio de sesión exitoso!
+            </div>
+            <button onClick={() => {
+              setShowSuccessModal(false);
+              if (pendingUser && onLogin) {
+                onLogin(pendingUser);
+                localStorage.setItem('usuario', JSON.stringify(pendingUser));
+                setPendingUser(null);
+              }
+            }} style={{
+              background: '#43a047',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 32px',
+              fontFamily: 'Chewy, system-ui',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(67,160,71,0.10)'
+            }}>Aceptar</button>
+          </div>
         </div>
       )}
       <img src={logo} alt="Burger Lab Logo" style={{ width: 220, height: 'auto', marginBottom: 0, marginTop: 0, zIndex: 10, position: 'relative' }} />
@@ -160,7 +190,7 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
           <a href="/register" style={{ color: "#457b9d", textDecoration: "underline", fontFamily: 'Chewy, system-ui', fontSize: 17 }}>¿No tienes cuenta? Crear cuenta</a>
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Email
           </label>
           <input
@@ -174,7 +204,7 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
           {emailError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{emailError}</div>}
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Contraseña
           </label>
           <div style={{ position: 'relative' }}>

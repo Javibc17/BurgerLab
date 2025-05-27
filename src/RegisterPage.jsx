@@ -24,6 +24,8 @@ export default function RegisterPage({ onRegister }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [rol, setRol] = useState("cliente");
   const [mensaje, setMensaje] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null); // Nuevo estado
   const mensajeTimeoutRef = React.useRef();
 
   // Validaciones
@@ -80,10 +82,11 @@ export default function RegisterPage({ onRegister }) {
     if (hasError) return;
     setLoading(true);
     try {
-      // Enviar la contraseña en texto plano, el backend la hashea
       const res = await api.post("/users", { nombre, email, password, rol });
       setLoading(false);
-      if (onRegister) onRegister(res.data, '¡Cuenta creada exitosamente! Ya puedes iniciar sesión.');
+      setShowSuccessModal(true);
+      setMensaje("");
+      setPendingUser(res.data); // Guardar usuario pendiente
     } catch (err) {
       setLoading(false);
       if (err.response?.data?.error?.toLowerCase().includes('email')) {
@@ -108,22 +111,53 @@ export default function RegisterPage({ onRegister }) {
         overflow: 'hidden'
       }}
     >
-      {mensaje && (
+      {showSuccessModal && (
         <div style={{
           position: 'fixed',
-          top: 30,
-          left: 30,
-          background: '#fff',
-          color: '#e63946',
-          padding: '16px 38px',
-          borderRadius: 12,
-          fontSize: '1.2rem',
-          fontFamily: 'Chewy, system-ui',
-          fontWeight: 600,
-          zIndex: 3000,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.18)'
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.35)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 4000
         }}>
-          {mensaje}
+          <div style={{
+            background: '#fff',
+            borderRadius: 16,
+            padding: '32px 36px',
+            minWidth: 320,
+            maxWidth: 420,
+            boxShadow: '0 8px 32px rgba(67,160,71,0.18)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 24
+          }}>
+            <div style={{ color: '#43a047', fontFamily: 'Chewy, system-ui', fontSize: '1.5rem', fontWeight: 700, textAlign: 'center' }}>
+              ¡Cuenta creada exitosamente!<br/>Ya puedes iniciar sesión.
+            </div>
+            <button onClick={() => {
+              setShowSuccessModal(false);
+              if (pendingUser && onRegister) {
+                onRegister(pendingUser);
+                setPendingUser(null);
+              }
+            }} style={{
+              background: '#43a047',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 32px',
+              fontFamily: 'Chewy, system-ui',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(67,160,71,0.10)'
+            }}>Aceptar</button>
+          </div>
         </div>
       )}
       {/* Logo principal SIEMPRE por encima de los logos decorativos */}
@@ -179,7 +213,7 @@ export default function RegisterPage({ onRegister }) {
           <a href="/login" style={{ color: "#457b9d", textDecoration: "underline", fontFamily: 'Chewy, system-ui' }}>¿Ya tienes cuenta? Inicia sesión</a>
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Nombre <span style={{ color: '#e63946' }}>*</span>
           </label>
           <input
@@ -194,7 +228,7 @@ export default function RegisterPage({ onRegister }) {
           {nombreError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{nombreError}</div>}
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Email <span style={{ color: '#e63946' }}>*</span>
           </label>
           <input
@@ -208,7 +242,7 @@ export default function RegisterPage({ onRegister }) {
           {emailError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{emailError}</div>}
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Contraseña <span style={{ color: '#e63946' }}>*</span>
           </label>
           <div style={{ position: 'relative' }}>
@@ -254,7 +288,7 @@ export default function RegisterPage({ onRegister }) {
           {passwordError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{passwordError}</div>}
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Confirmar contraseña <span style={{ color: '#e63946' }}>*</span>
           </label>
           <div style={{ position: 'relative' }}>
@@ -297,7 +331,7 @@ export default function RegisterPage({ onRegister }) {
           {confirmPasswordError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{confirmPasswordError}</div>}
         </div>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#e63946', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
             Rol <span style={{ color: '#e63946' }}>*</span>
           </label>
           <select

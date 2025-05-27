@@ -112,6 +112,33 @@ app.put('/api/users/:id', async (req, res) => {
   }
 });
 
+// ENDPOINT ELIMINAR USUARIO (con borrado en cascada opcional)
+app.delete('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const force = req.query.force === 'true';
+  try {
+    if (force) {
+      // Borra primero tickets y reservas del usuario
+      await db.execute('DELETE FROM tickets WHERE usuarioId=?', [id]);
+      await db.execute('DELETE FROM reservas WHERE usuarioId=?', [id]);
+    }
+    const [result] = await db.execute('DELETE FROM users WHERE id=?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, error: 'Usuario no encontrado o ya eliminado.' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    // Si es error de clave foránea, mensaje especial
+    if (err && err.code && err.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(409).json({
+        success: false,
+        error: 'No se puede borrar este usuario porque tiene pedidos o reservas asociados. Debe eliminarlos primero.'
+      });
+    }
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ENDPOINTS TICKETS
 app.post('/api/tickets', async (req, res) => {
   const { usuarioId, numero, fecha, hora, productos, total } = req.body;
@@ -218,11 +245,31 @@ app.put('/api/reservas/:id', async (req, res) => {
 // ENDPOINTS CRUD PRODUCTOS
 app.post('/api/productos', async (req, res) => {
   const { categoria, title, price, description, image, modalImage } = req.body;
-  const [result] = await db.execute(
-    'INSERT INTO productos (categoria, title, price, description, image, modalImage) VALUES (?, ?, ?, ?, ?, ?)',
-    [categoria, title, price, description, image, modalImage]
-  );
-  res.status(201).json({ id: result.insertId, categoria, title, price, description, image, modalImage });
+  const allowedCategorias = ['hamburguesas', 'entrantes', 'postres'];
+  if (!categoria || !allowedCategorias.includes(categoria)) {
+    return res.status(400).json({ error: 'La categoría debe ser hamburguesas, entrantes o postres.' });
+  }
+  if (!title || typeof title !== 'string' || title.trim().length < 2) {
+    return res.status(400).json({ error: 'El título debe tener al menos 2 caracteres.' });
+  }
+  if (price === undefined || price === null || isNaN(Number(price)) || Number(price) <= 0) {
+    return res.status(400).json({ error: 'El precio debe ser un número positivo.' });
+  }
+  if (!description || typeof description !== 'string' || description.trim().length < 2) {
+    return res.status(400).json({ error: 'La descripción debe tener al menos 2 caracteres.' });
+  }
+  if (!image || typeof image !== 'string' || image.trim().length < 2) {
+    return res.status(400).json({ error: 'La imagen es obligatoria.' });
+  }
+  try {
+    const [result] = await db.execute(
+      'INSERT INTO productos (categoria, title, price, description, image, modalImage) VALUES (?, ?, ?, ?, ?, ?)',
+      [categoria, title, price, description, image, modalImage]
+    );
+    res.status(201).json({ id: result.insertId, categoria, title, price, description, image, modalImage });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 app.get('/api/productos', async (req, res) => {
@@ -242,8 +289,15 @@ app.put('/api/productos/:id', async (req, res) => {
 
 app.delete('/api/productos/:id', async (req, res) => {
   const { id } = req.params;
-  await db.execute('DELETE FROM productos WHERE id=?', [id]);
-  res.json({ success: true });
+  try {
+    const [result] = await db.execute('DELETE FROM productos WHERE id=?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, error: 'Producto no encontrado o ya eliminado.' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 4000;

@@ -298,6 +298,9 @@
   margin-top: 2px;
   margin-bottom: 0;
 }
+.crud-modal-error, .crud-table-error, .crud-table-container .crud-modal-error {
+  color: #e63946 !important;
+}
 .crud-modal-actions {
   display: flex;
   gap: 12px;
@@ -402,8 +405,8 @@
 }
 .crud-table-search-btn {
   background: #fff;
-  color: #43b96a;
-  border: 2px solid #43b96a;
+  color: #1976d2;
+  border: 2px solid #1976d2;
   border-radius: 8px;
   padding: 10px 24px;
   font-family: 'Chewy', system-ui;
@@ -412,9 +415,33 @@
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border 0.18s;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .crud-table-search-btn:hover {
-  background: #43b96a;
+  background: #1976d2;
+  color: #fff;
+  border-color: #fff;
+}
+.crud-table-add-btn-inline {
+  background: #fff;
+  color: #1976d2;
+  border: 2px solid #1976d2;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-family: 'Chewy', system-ui;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.crud-table-add-btn-inline:hover {
+  background: #1976d2;
   color: #fff;
   border-color: #fff;
 }

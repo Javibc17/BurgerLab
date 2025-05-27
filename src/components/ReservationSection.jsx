@@ -86,23 +86,23 @@ function ReservationSection() {
           )}
           <form className="reservation-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="name">Nombre</label>
+              <label htmlFor="name" style={{ color: '#222' }}>Nombre</label>
               <input type="text" id="name" name="name" placeholder="Tu nombre" value={nombre} onChange={e => setNombre(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label htmlFor="email">Correo</label>
+              <label htmlFor="email" style={{ color: '#222' }}>Correo</label>
               <input type="email" id="email" name="email" placeholder="Tu correo" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label htmlFor="date">Fecha</label>
+              <label htmlFor="date" style={{ color: '#222' }}>Fecha</label>
               <input type="date" id="date" name="date" value={fecha} onChange={e => setFecha(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label htmlFor="time">Hora</label>
+              <label htmlFor="time" style={{ color: '#222' }}>Hora</label>
               <input type="time" id="time" name="time" value={hora} onChange={e => setHora(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label htmlFor="personas">Personas</label>
+              <label htmlFor="personas" style={{ color: '#222' }}>Personas</label>
               <input type="number" id="personas" name="personas" min={1} max={20} value={personas} onChange={e => setPersonas(Number(e.target.value))} required />
             </div>
             <div className="form-group">

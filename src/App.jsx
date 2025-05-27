@@ -372,7 +372,6 @@ function App() {
                   { key: "id", label: "ID" },
                   { key: "nombre", label: "Nombre" },
                   { key: "email", label: "Email" },
-                  { key: "rol", label: "Rol" },
                   { key: "fechaRegistro", label: "Fecha Registro", format: v => v ? new Date(v).toLocaleDateString('es-ES') : '' },
                 ]}
                 addLabel="Añadir usuario"
@@ -549,40 +548,19 @@ function App() {
               }
             }}>
               <div className="perfil-modal-info" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <label style={{ fontWeight: 600, color: '#e63946' }}>Nombre:
+                <label style={{ fontWeight: 600, color: '#222' }}>Nombre:
                   <input type="text" value={editNombre} onChange={e => setEditNombre(e.target.value)} style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid #ccc', marginTop: 4 }} required minLength={2} />
                 </label>
-                <label style={{ fontWeight: 600, color: '#e63946' }}>Email:
+                <label style={{ fontWeight: 600, color: '#222' }}>Email:
                   <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid #ccc', marginTop: 4 }} required />
                 </label>
-                <div><b>Rol:</b> {usuario.rol}</div>
-                <div><b>Número de pedidos:</b> {numPedidos}
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const res = await api.get(`/tickets?usuarioId=${usuario.id}`);
-                        setHistorialPedidos(res.data);
-                        setShowHistorial(true);
-                      } catch (e) {
-                        setMensaje('No se pudo cargar el historial');
-                      }
-                    }}
-                    style={{
-                      marginLeft: 12,
-                      background: '#fff',
-                      color: '#e63946',
-                      border: '1.5px solid #e63946',
-                      borderRadius: 7,
-                      padding: '4px 12px',
-                      fontFamily: 'Chewy, system-ui',
-                      fontSize: '1.05rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 4px rgba(230,57,70,0.10)'
-                    }}
-                  >Historial</button>
-                </div>
+                {/* Eliminar número de pedidos e historial para administradores */}
+                {usuario.rol !== 'admin' && (
+                  <div><b style={{ color: '#e63946' }}>Rol:</b> <span style={{ color: '#e63946', fontWeight: 700 }}>{usuario.rol}</span></div>
+                )}
+                {usuario.rol === 'admin' && (
+                  <div><b style={{ color: '#e63946' }}>Rol:</b> <span style={{ color: '#e63946', fontWeight: 700 }}>admin</span></div>
+                )}
               </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 18, justifyContent: 'center' }}>
                 <button type="submit" style={{
@@ -785,6 +763,7 @@ function AppWithRouter() {
         onLogin={user => {
           setMensajeLogin('¡Inicio de sesión exitoso!');
           setTimeout(() => setMensajeLogin(''), 5000);
+          // Navegar solo tras cerrar el modal (ahora lo hace la página)
           navigate("/");
         }}
       />
@@ -792,8 +771,9 @@ function AppWithRouter() {
   }
   function RegisterRouteWrapper(props) {
     const navigate = useNavigate();
-    return <RegisterPage {...props} onRegister={(user, mensaje) => {
-      setMensajeRegistro(mensaje || "");
+    return <RegisterPage {...props} onRegister={(user) => {
+      setMensajeRegistro('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.');
+      // Navegar solo tras cerrar el modal (ahora lo hace la página)
       navigate("/login");
     }} />;
   }
