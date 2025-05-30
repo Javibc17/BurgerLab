@@ -2,7 +2,6 @@ import React from "react";
 import MenuItem from "./MenuItem";
 
 function MenuCategory({ title, items, id, onProductClick }) {
-  // Descripciones para entrantes y postres
   const extraDescriptions = {
     entrantes: [
       "Clásicas patatas fritas doradas.",
@@ -24,7 +23,6 @@ function MenuCategory({ title, items, id, onProductClick }) {
       <h3 className="category-title">{title}</h3>
       <div className="menu-items-container">
         {items.map((item, index) => {
-          // Hamburguesas, entrantes y postres: abre modal
           return (
             <div key={index} onClick={() => onProductClick && onProductClick({
               ...item,

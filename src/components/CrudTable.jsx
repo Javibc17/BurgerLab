@@ -109,14 +109,19 @@ export default function CrudTable({ endpoint, columns, title, addLabel }) {
       }
       if (modalEdit) {
         let formToSend = { ...form };
-        if (endpoint.includes('/reservas')) {
+        if (endpoint.includes('/reservas') || endpoint.includes('/tickets')) {
           const usuarioGuardado = localStorage.getItem('usuario');
           const user = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
           formToSend.usuarioId = user && user.id ? user.id : null;
           formToSend.comentario = typeof formToSend.comentario === 'string' ? formToSend.comentario : '';
           formToSend.nombre = formToSend.nombre ? String(formToSend.nombre) : '';
           formToSend.email = formToSend.email ? String(formToSend.email) : '';
-          formToSend.fecha = formToSend.fecha ? String(formToSend.fecha).slice(0,10) : '';
+          // Guardar la fecha tal cual la selecciona el usuario, sin sumar días
+          if (endpoint.includes('/reservas') && formToSend.fecha) {
+            formToSend.fecha = formToSend.fecha ? String(formToSend.fecha).slice(0,10) : '';
+          } else {
+            formToSend.fecha = formToSend.fecha ? String(formToSend.fecha).slice(0,10) : '';
+          }
           formToSend.hora = formToSend.hora ? String(formToSend.hora).slice(0,5) : '';
           formToSend.personas = Number(formToSend.personas) || 1;
         }
@@ -125,14 +130,19 @@ export default function CrudTable({ endpoint, columns, title, addLabel }) {
       } else {
         // Eliminar confirmPassword antes de enviar al backend
         const { confirmPassword, ...formToSend } = form;
-        if (endpoint.includes('/reservas')) {
+        if (endpoint.includes('/reservas') || endpoint.includes('/tickets')) {
           const usuarioGuardado = localStorage.getItem('usuario');
           const user = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
           formToSend.usuarioId = user && user.id ? user.id : null;
           formToSend.comentario = typeof formToSend.comentario === 'string' ? formToSend.comentario : '';
           formToSend.nombre = formToSend.nombre ? String(formToSend.nombre) : '';
           formToSend.email = formToSend.email ? String(formToSend.email) : '';
-          formToSend.fecha = formToSend.fecha ? String(formToSend.fecha).slice(0,10) : '';
+          // Guardar la fecha tal cual la selecciona el usuario, sin sumar días
+          if (endpoint.includes('/reservas') && formToSend.fecha) {
+            formToSend.fecha = formToSend.fecha ? String(formToSend.fecha).slice(0,10) : '';
+          } else {
+            formToSend.fecha = formToSend.fecha ? String(formToSend.fecha).slice(0,10) : '';
+          }
           formToSend.hora = formToSend.hora ? String(formToSend.hora).slice(0,5) : '';
           formToSend.personas = Number(formToSend.personas) || 1;
         }
@@ -148,7 +158,7 @@ export default function CrudTable({ endpoint, columns, title, addLabel }) {
 
   const handleAdd = () => {
     setModalEdit(false);
-    setModalInitial({});
+    setModalInitial({ ...{} }); // Fuerza nueva referencia para reiniciar el modal
     setModalOpen(true);
   };
 
@@ -183,14 +193,33 @@ export default function CrudTable({ endpoint, columns, title, addLabel }) {
     if (search !== "") {
       const matchGeneral = columns.filter(col => col.key !== 'id').some(col => {
         const val = row[col.key];
+        // Si la columna es fecha, comparar en formato local
+        if (col.key.toLowerCase().includes('fecha') && val) {
+          const fechaLocal = new Date(val).toLocaleDateString('es-ES');
+          return fechaLocal.includes(search);
+        }
         return val && val.toString().toLowerCase().includes(search);
       });
       // Además, deben cumplirse los filtros de columna
-      const matchColumnFilters = Object.entries(filters).every(([key, val]) => !val || (row[key] && row[key].toString().toLowerCase().startsWith(val.toLowerCase())));
+      const matchColumnFilters = Object.entries(filters).every(([key, val]) => {
+        if (!val) return true;
+        if (key.toLowerCase().includes('fecha') && row[key]) {
+          const fechaLocal = new Date(row[key]).toLocaleDateString('es-ES');
+          return fechaLocal.startsWith(val);
+        }
+        return row[key] && row[key].toString().toLowerCase().startsWith(val.toLowerCase());
+      });
       return matchGeneral && matchColumnFilters;
     }
     // Si no hay búsqueda general, solo aplica los filtros de columna
-    return Object.entries(filters).every(([key, val]) => !val || (row[key] && row[key].toString().toLowerCase().startsWith(val.toLowerCase())))
+    return Object.entries(filters).every(([key, val]) => {
+      if (!val) return true;
+      if (key.toLowerCase().includes('fecha') && row[key]) {
+        const fechaLocal = new Date(row[key]).toLocaleDateString('es-ES');
+        return fechaLocal.startsWith(val);
+      }
+      return row[key] && row[key].toString().toLowerCase().startsWith(val.toLowerCase());
+    });
   });
 
   // Hacer que la búsqueda general reinicie la paginación al escribir

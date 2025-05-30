@@ -5,6 +5,9 @@ import logo from './assets/logoLetrasRojo.png';
 import logoSolo from './assets/logo.png';
 import eyeOff from './assets/proicons--eye-off.svg';
 import eyeOn from './assets/proicons--eye.svg';
+import { validarEmail, validarPassword, validarNombre } from './utils/validaciones';
+import { ERRORES } from './utils/errores';
+import { EXITOS } from './utils/exitos';
 
 export default function RegisterPage({ onRegister }) {
   const [nombre, setNombre] = useState("");
@@ -22,23 +25,11 @@ export default function RegisterPage({ onRegister }) {
   const [checkboxError, setCheckboxError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [rol, setRol] = useState("cliente");
   const [mensaje, setMensaje] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [pendingUser, setPendingUser] = useState(null); // Nuevo estado
+  const [pendingUser, setPendingUser] = useState(null);
+  const [fotoPerfil, setFotoPerfil] = useState("/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163338.png");
   const mensajeTimeoutRef = React.useRef();
-
-  // Validaciones
-  const validarEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-  const validarPassword = (password) => {
-    // Al menos 6 caracteres, una letra y un número
-    return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password);
-  };
-  const validarNombre = (nombre) => {
-    return nombre.trim().length >= 2;
-  };
 
   React.useEffect(() => {
     if (mensaje) {
@@ -60,39 +51,40 @@ export default function RegisterPage({ onRegister }) {
     setCheckboxError("");
     let hasError = false;
     if (!validarNombre(nombre)) {
-      setNombreError("El nombre debe tener al menos 2 caracteres.");
+      setNombreError(ERRORES.nombre);
       hasError = true;
     }
     if (!validarEmail(email)) {
-      setEmailError("Introduce un email válido.");
+      setEmailError(ERRORES.email);
       hasError = true;
     }
     if (!validarPassword(password)) {
-      setPasswordError("La contraseña debe tener al menos 6 caracteres, una letra y un número.");
+      setPasswordError(ERRORES.password);
       hasError = true;
     }
     if (password !== confirmPassword) {
-      setConfirmPasswordError("Las contraseñas no coinciden.");
+      setConfirmPasswordError(ERRORES.confirmPassword);
       hasError = true;
     }
     if (!aceptaTerminos || !aceptaPrivacidad) {
-      setCheckboxError("Debes aceptar los Términos y Condiciones y la Política de Privacidad");
+      setCheckboxError(ERRORES.checkbox);
       hasError = true;
     }
     if (hasError) return;
     setLoading(true);
     try {
-      const res = await api.post("/users", { nombre, email, password, rol });
+      const fotoPerfilNombre = fotoPerfil.startsWith('/src/assets/fotoperfil/') ? fotoPerfil.replace('/src/assets/fotoperfil/', '') : fotoPerfil;
+      const res = await api.post("/users", { nombre, email, password, rol: "cliente", fotoPerfil: fotoPerfilNombre });
       setLoading(false);
       setShowSuccessModal(true);
       setMensaje("");
-      setPendingUser(res.data); // Guardar usuario pendiente
+      setPendingUser(res.data);
     } catch (err) {
       setLoading(false);
       if (err.response?.data?.error?.toLowerCase().includes('email')) {
-        setEmailError('Este correo ya está registrado.');
+        setEmailError(ERRORES.emailRepetido);
       } else {
-        setError(err.response?.data?.error || "Error al crear la cuenta");
+        setError(err.response?.data?.error || ERRORES.crearCuenta);
       }
     }
   };
@@ -137,7 +129,9 @@ export default function RegisterPage({ onRegister }) {
             gap: 24
           }}>
             <div style={{ color: '#43a047', fontFamily: 'Chewy, system-ui', fontSize: '1.5rem', fontWeight: 700, textAlign: 'center' }}>
-              ¡Cuenta creada exitosamente!<br/>Ya puedes iniciar sesión.
+              {EXITOS.cuentaCreada.split('\n').map((line, i) => (
+                <React.Fragment key={i}>{line}<br/></React.Fragment>
+              ))}
             </div>
             <button onClick={() => {
               setShowSuccessModal(false);
@@ -160,16 +154,14 @@ export default function RegisterPage({ onRegister }) {
           </div>
         </div>
       )}
-      {/* Logo principal SIEMPRE por encima de los logos decorativos */}
       <img src={logo} alt="Burger Lab Logo" style={{ width: 220, height: 'auto', marginBottom: 0, marginTop: 0, zIndex: 10, position: 'relative' }} />
-      {/* Logos decorativos de fondo con logoSolo, mucha cantidad y solo detrás del formulario, nunca detrás del logo principal */}
       <div style={{
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        zIndex: 1, // Los logos están por encima del fondo pero por debajo del formulario y del logo principal
+        zIndex: 1,
         pointerEvents: 'none',
         overflow: 'hidden',
       }}>
@@ -179,7 +171,7 @@ export default function RegisterPage({ onRegister }) {
             { top: 120, right: 60 },
             { bottom: 60, left: 80 },
             { bottom: 30, right: 30 },
-            { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-5deg)', display: 'none' }, // Eliminar el logo que queda justo detrás del logo principal
+            { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-5deg)', display: 'none' },
             { bottom: 0, right: '50%', transform: 'translateX(50%) rotate(-8deg)' },
             { top: 200, left: 200, transform: 'rotate(18deg)' },
             { bottom: 180, right: 120, transform: 'rotate(-15deg)' },
@@ -195,7 +187,7 @@ export default function RegisterPage({ onRegister }) {
           ];
           const sizes = [60, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 200, 220, 240, 260, 280, 300];
           const pos = positions[i % positions.length];
-          if (pos.display === 'none') return null; // No renderizar el logo que queda detrás del logo principal
+          if (pos.display === 'none') return null;
           const style = {
             position: 'absolute',
             width: sizes[i % sizes.length],
@@ -211,6 +203,42 @@ export default function RegisterPage({ onRegister }) {
         <h2 style={{ color: "#e63946", fontFamily: "Chewy, system-ui", textAlign: "center", marginBottom: 24 }}>Crear cuenta</h2>
         <div style={{ marginBottom: 18, textAlign: "center" }}>
           <a href="/login" style={{ color: "#457b9d", textDecoration: "underline", fontFamily: 'Chewy, system-ui' }}>¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 8, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
+            Elige tu foto de perfil
+          </label>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {[
+              '/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163338.png',
+              '/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163352.png',
+              '/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163358.png',
+              '/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163402.png',
+              '/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163409.png',
+              '/src/assets/fotoperfil/Captura de pantalla 2025-03-09 163416.png',
+            ].map(foto => (
+              <img
+                key={foto}
+                src={foto}
+                alt="foto perfil"
+                onClick={() => setFotoPerfil(foto)}
+                style={{
+                  width: 54,
+                  height: 54,
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  border: fotoPerfil === foto ? '3px solid #e63946' : '2px solid #ccc',
+                  cursor: 'pointer',
+                  boxShadow: fotoPerfil === foto ? '0 0 0 2px #e6394633' : 'none',
+                  transition: 'border 0.2s, box-shadow 0.2s',
+                  background: '#fff',
+                }}
+              />
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 8, fontSize: 13, color: '#888' }}>
+            Puedes cambiarla más tarde en tu perfil
+          </div>
         </div>
         <div style={{ marginBottom: 18 }}>
           <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
@@ -252,7 +280,7 @@ export default function RegisterPage({ onRegister }) {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={7}
               style={{ width: "100%", padding: 14, borderRadius: 8, border: "1.5px solid #e63946", fontSize: 18, boxSizing: 'border-box', paddingRight: 44 }}
             />
             <button
@@ -282,8 +310,29 @@ export default function RegisterPage({ onRegister }) {
               )}
             </button>
           </div>
+          <div style={{ width: '100%', display: 'flex', gap: 6, margin: '8px 0 2px 0', height: 7 }}>
+            {(() => {
+              const pwd = password || "";
+              const checks = [
+                /[A-Z]/.test(pwd),
+                /\d/.test(pwd),
+                /[^A-Za-z0-9]/.test(pwd),
+                pwd.length >= 7
+              ];
+              const passed = checks.filter(Boolean).length;
+              return [0,1,2,3].map(i => (
+                <div key={i} style={{
+                  flex: 1,
+                  height: 7,
+                  borderRadius: 4,
+                  background: i < passed ? '#43b96a' : '#e0e0e0',
+                  transition: 'background 0.2s',
+                }} />
+              ));
+            })()}
+          </div>
           <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>
-            Mínimo 6 caracteres, al menos una letra y un número.
+            Mínimo 7 caracteres, al menos una mayúscula, un número y un símbolo.
           </div>
           {passwordError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{passwordError}</div>}
         </div>
@@ -329,21 +378,6 @@ export default function RegisterPage({ onRegister }) {
             </button>
           </div>
           {confirmPasswordError && <div style={{ color: '#e63946', fontSize: 13, marginTop: 2 }}>{confirmPasswordError}</div>}
-        </div>
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, display: 'block', color: '#222', letterSpacing: 0.2, fontFamily: 'Chewy, system-ui' }}>
-            Rol <span style={{ color: '#e63946' }}>*</span>
-          </label>
-          <select
-            value={rol}
-            onChange={e => setRol(e.target.value)}
-            required
-            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1.5px solid #e63946", fontSize: 17, boxSizing: 'border-box', background: '#fff', color: '#e63946', fontFamily: 'Chewy, system-ui' }}
-          >
-            <option value="cliente">Cliente</option>
-            <option value="empleado">Empleado</option>
-            <option value="admin">Administrador</option>
-          </select>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'flex', alignItems: 'center', fontSize: 15 }}>

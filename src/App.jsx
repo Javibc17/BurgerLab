@@ -1,4 +1,3 @@
-// 1. Imports
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import LoginPage from "./LoginPage";
@@ -15,8 +14,10 @@ import CalendarSection from './components/CalendarSection';
 import AdminPanel from "./components/AdminPanel";
 import ProductAdminPanel from "./components/ProductAdminPanel";
 import CrudTable from "./components/CrudTable";
+import BurgerLabCustomizer from "./components/BurgerLabCustomizer";
+import shoppingBag from "./assets/fluent--shopping-bag-48-regular (1).png";
+import EstadisticasCharts from './components/EstadisticasCharts';
 
-// Utilidad para formatear fecha y hora
 function formatFecha(fecha) {
   if (!fecha) return '';
   const d = new Date(fecha);
@@ -25,23 +26,27 @@ function formatFecha(fecha) {
 }
 function formatHora(hora) {
   if (!hora) return '';
-  // Si es tipo string tipo '09:53:00' => '09:53'
   if (typeof hora === 'string' && hora.length >= 5) return hora.slice(0,5);
-  // Si es tipo Date
   if (hora instanceof Date) return hora.toTimeString().slice(0,5);
   return hora;
 }
 
-// 2. Componente principal
 function App() {
+  const imagenesPerfil = [
+    'Captura de pantalla 2025-03-09 163338.png',
+    'Captura de pantalla 2025-03-09 163352.png',
+    'Captura de pantalla 2025-03-09 163358.png',
+    'Captura de pantalla 2025-03-09 163402.png',
+    'Captura de pantalla 2025-03-09 163409.png',
+    'Captura de pantalla 2025-03-09 163416.png',
+  ];
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  // Estado para el pedido
   const [pedido, setPedido] = useState([]);
   const [pedidoVisible, setPedidoVisible] = useState(false);
-  // Estado para productos del backend
   const [productos, setProductos] = useState([]);
-  const [mensaje, setMensaje] = useState("");
+  const [mensaje, setMensaje] = useState(null);
   const mensajeTimeoutRef = React.useRef();
   const [showTicketMsg, setShowTicketMsg] = useState(false);
   const [ultimoTicket, setUltimoTicket] = useState(null);
@@ -54,15 +59,19 @@ function App() {
   const [historialPedidos, setHistorialPedidos] = useState([]);
   const [numPedidos, setNumPedidos] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [reservasTrigger, setReservasTrigger] = useState(0);
+  const [fotoPerfil, setFotoPerfil] = useState(null);
+  const [erroresPerfil, setErroresPerfil] = useState({});
   const navigate = useNavigate ? useNavigate() : () => {};
-  // Calcular el total
+  const [usuariosAdmin, setUsuariosAdmin] = useState([]);
+  const [reservasAdmin, setReservasAdmin] = useState([]);
+  const [ticketsAdmin, setTicketsAdmin] = useState([]);
+
   const total = pedido.reduce((acc, item) => {
-    // Extraer el número del precio (puede venir como "9,50 €")
     const num = parseFloat(item.price.replace(',', '.'));
     return acc + (isNaN(num) ? 0 : num);
   }, 0);
 
-  // Cargar pedido de localStorage al iniciar (solo una vez)
   React.useEffect(() => {
     try {
       const pedidoGuardado = localStorage.getItem('pedido');
@@ -74,41 +83,38 @@ function App() {
     }
   }, []);
 
-  // Guardar pedido en localStorage cada vez que cambie
   React.useEffect(() => {
     try {
       localStorage.setItem('pedido', JSON.stringify(pedido));
     } catch (e) {
-      // Ignorar errores de almacenamiento
     }
   }, [pedido]);
 
-  // Cargar usuario de localStorage al iniciar (solo una vez)
   React.useEffect(() => {
     try {
       const usuarioGuardado = localStorage.getItem('usuario');
       if (usuarioGuardado) {
-        setUsuario(JSON.parse(usuarioGuardado));
-        setEditNombre(JSON.parse(usuarioGuardado).nombre);
-        setEditEmail(JSON.parse(usuarioGuardado).email);
+        const userObj = JSON.parse(usuarioGuardado);
+        setUsuario(userObj);
+        setEditNombre(userObj.nombre);
+        setEditEmail(userObj.email);
+        setFotoPerfil(userObj.fotoPerfil || null);
       }
     } catch (e) {
       setUsuario(null);
     }
   }, []);
 
-  // Obtener productos del backend al cargar
   React.useEffect(() => {
     api.get('/productos')
       .then(res => setProductos(res.data))
       .catch(() => setProductos([]));
   }, []);
 
-  // Mensaje global con autohide
   React.useEffect(() => {
-    if (mensaje) {
+    if (mensaje && mensaje.texto) {
       if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
-      mensajeTimeoutRef.current = setTimeout(() => setMensaje(""), 5000);
+      mensajeTimeoutRef.current = setTimeout(() => setMensaje(null), 5000);
     }
     return () => {
       if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
@@ -123,14 +129,22 @@ function App() {
     }
   }, [usuario]);
 
+  React.useEffect(() => {
+    if (usuario && usuario.rol === 'admin') {
+      api.get('/users').then(res => setUsuariosAdmin(res.data)).catch(() => setUsuariosAdmin([]));
+      api.get('/tickets').then(res => setTicketsAdmin(res.data)).catch(() => setTicketsAdmin([]));
+      api.get('/reservas').then(res => setReservasAdmin(res.data)).catch(() => setReservasAdmin([]));
+    }
+  }, [usuario]);
+
   const handleAddToPedido = (producto) => {
     setPedido([...pedido, producto]);
-    setSelectedProduct(null); // Cierra el modal al añadir
-    setMensaje(`Producto añadido: ${producto.title}`);
+    setSelectedProduct(null);
+    setMensaje({ texto: `Producto añadido: ${producto.title}`, color: '#218838' });
   };
 
   const handleRemoveFromPedido = (index) => {
-    setMensaje(`Producto eliminado: ${pedido[index].title}`);
+    setMensaje({ texto: `Producto eliminado: ${pedido[index].title}`, color: '#e63946' });
     setPedido(pedido.filter((_, i) => i !== index));
   };
 
@@ -138,14 +152,17 @@ function App() {
     alert("Reserva realizada con éxito!");
   };
 
-  // Nueva función para confirmar pedido
   const handleConfirmPedido = async () => {
+    if (!pedido || pedido.length === 0) {
+      setMensaje({ texto: 'No hay productos en el pedido.', color: '#e63946' });
+      return;
+    }
     const now = new Date();
     const ticket = {
-      usuarioId: usuario.id, // <-- Añadir usuarioId
+      usuarioId: usuario.id,
       numero: Math.floor(Math.random() * 90000 + 10000),
-      fecha: now.toISOString().slice(0, 10), // YYYY-MM-DD para MySQL
-      hora: now.toTimeString().slice(0, 5),  // HH:mm para MySQL
+      fecha: now.toISOString().slice(0, 10),
+      hora: now.toTimeString().slice(0, 5),
       productos: [...pedido],
       total: pedido.reduce((acc, item) => {
         const num = parseFloat(item.price.replace(',', '.'));
@@ -153,35 +170,32 @@ function App() {
       }, 0)
     };
     try {
-      // Guardar ticket en backend MySQL
       const res = await api.post('/tickets', ticket);
       setUltimoTicket(res.data);
-      setMensaje('¡Gracias por tu pedido! En breve lo estaremos preparando.');
+      setMensaje({ texto: '¡Gracias por tu pedido! En breve lo estaremos preparando. Ve al apartado de Mis pedidos para ver el ticket.', color: '#218838' });
       setPedido([]);
       setPedidoVisible(false);
       localStorage.removeItem('pedido');
-      // ACTUALIZAR NÚMERO DE PEDIDOS SIN RECARGAR
       if (usuario && usuario.id) {
         const ticketsRes = await api.get(`/tickets?usuarioId=${usuario.id}`);
         setNumPedidos(ticketsRes.data.length);
       }
       setTimeout(() => {
-        setMensaje('');
+        setMensaje(null);
         setShowTicketMsg(true);
         setTimeout(() => setShowTicketMsg(false), 3500);
       }, 2500);
     } catch (err) {
-      setMensaje('Error al guardar el pedido. Intenta de nuevo.');
+      setMensaje({ texto: 'Error al guardar el pedido. Intenta de nuevo.', color: '#e63946' });
     }
   };
 
-  // Al cargar, obtener el último ticket del usuario logueado
   React.useEffect(() => {
     if (usuario && usuario.id) {
       api.get(`/tickets?usuarioId=${usuario.id}`)
         .then(res => {
           if (res.data && res.data.length > 0) {
-            setUltimoTicket(res.data[0]); // El más reciente del usuario
+            setUltimoTicket(res.data[0]);
           } else {
             setUltimoTicket(null);
           }
@@ -190,14 +204,11 @@ function App() {
     }
   }, [usuario]);
 
-  // Handler para el botón de perfil/login
   const handleLogin = () => {
     setShowPerfilModal(true);
   };
 
-  // Si no está logueado, mostrar LoginPage
   if (!usuario) {
-    // Solo mostrar mensajeProp si existe, y pasarlo a LoginPage
     return <LoginPage 
       onLogin={user => {
         setUsuario(user);
@@ -206,11 +217,10 @@ function App() {
         localStorage.setItem('usuario', JSON.stringify(user));
         navigate("/");
       }}
-      mensajeProp={undefined} // No usar window.mensajeRegistro, se gestiona por el router
+      mensajeProp={undefined}
     />;
   }
 
-  // Si el usuario es admin y quiere ver el panel de admin
   if (usuario.rol === 'admin' && showAdminPanel) {
     return <>
       <button onClick={() => setShowAdminPanel(false)} style={{position:'fixed',top:20,left:20,zIndex:9999,background:'#e63946',color:'#fff',border:'none',borderRadius:8,padding:'10px 18px',fontFamily:'Chewy, system-ui',fontSize:'1.1rem',fontWeight:600,cursor:'pointer'}}>Volver a inicio</button>
@@ -218,47 +228,75 @@ function App() {
     </>;
   }
 
+  const handleReservaCreada = () => {
+    setReservasTrigger(t => t + 1);
+    setMensaje({ texto: 'Mesa reservada correctamente', color: '#218838' });
+    if (mensajeTimeoutRef.current) clearTimeout(mensajeTimeoutRef.current);
+    mensajeTimeoutRef.current = setTimeout(() => setMensaje(null), 3000);
+  };
+
+  const isBurgerLab = selectedProduct && selectedProduct.title === "BurgerLab";
+
   return (
     <div className="App">
-      {mensaje && (
+      {mensaje && mensaje.texto && (
         <div style={{
           position: 'fixed',
           top: 30,
           left: 30,
           background: '#fff',
-          color: '#e63946',
+          color: mensaje.color || '#218838',
           padding: '16px 38px',
           borderRadius: 12,
           fontSize: '1.2rem',
           fontFamily: 'Chewy, system-ui',
           fontWeight: 600,
           zIndex: 3000,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.18)'
+          boxShadow: '0 2px 12px rgba(33,136,56,0.18)',
+          border: '2px solid #218838',
+          minWidth: 260,
+          textAlign: 'center',
         }}>
-          {mensaje}
+          {mensaje.texto}
         </div>
       )}
-      {showTicketMsg && (
-        <div style={{
-          position: 'fixed',
-          top: 90,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#fff',
-          color: '#e63946',
-          padding: '16px 38px',
-          borderRadius: 12,
-          fontSize: '1.2rem',
-          fontFamily: 'Chewy, system-ui',
-          fontWeight: 600,
-          zIndex: 3000,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.18)'
-        }}>
-          Ve al apartado de <b>Mis pedidos</b> para ver el ticket.
-        </div>
-      )}
+      
+      
       <header className="shadow-container">
         <div className="container">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+              <div style={{
+                width: 68,
+                height: 68,
+                borderRadius: '50%',
+                background: '#f4c2c2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 38,
+                color: '#fff',
+                fontWeight: 700,
+                border: '3px solid #e63946',
+                boxShadow: '0 2px 8px #c13a3a22',
+                overflow: 'hidden',
+              }}>
+                {usuario?.fotoPerfil ? (
+                  <img
+                    src={usuario.fotoPerfil.startsWith('/') ? usuario.fotoPerfil : `/src/assets/fotoperfil/${usuario.fotoPerfil}`}
+                    alt="Perfil"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  />
+                ) : (
+                  <span style={{ fontSize: 38 }}>{usuario?.nombre?.[0]?.toUpperCase() || '?'}</span>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+                <span style={{ fontFamily: 'Chewy, system-ui', fontWeight: 700, fontSize: '1.65rem', color: '#f4c2c2', letterSpacing: 1 }}>{usuario?.nombre}</span>
+                <span style={{ fontFamily: 'Chewy, system-ui', fontWeight: 500, fontSize: '1.15rem', color: '#C13A3A', marginTop: 6 }}>{usuario?.rol}</span>
+              </div>
+            </div>
+          </div>
           <nav className="navbar">
             <ul className="nav-links">
               {usuario.rol !== 'admin' && (
@@ -275,6 +313,7 @@ function App() {
               )}
               {usuario.rol === 'admin' ? (
                 <>
+                  <li className="underline-anim"><a href="#estadisticas">Estadísticas</a></li>
                   <li className="underline-anim"><a href="#reservas">Reservas</a></li>
                   <li className="underline-anim"><a href="#usuarios">Usuarios</a></li>
                   <li className="underline-anim"><a href="#pedidos">Pedidos</a></li>
@@ -303,18 +342,15 @@ function App() {
       </header>
 
       <main className="menu-section" id="inicio">
-        {/* Solo mostrar el menú de productos si NO es admin */}
-        {usuario.rol !== 'admin' && (
+        {usuario.rol !== 'admin' && usuario.rol !== 'empleado' && (
           <>
             <div className="menu-header">
               <img src={logo} alt="Menu Icon" className="menu-logo" />
               <h2 className="menu-title">MENÚ</h2>
             </div>
-            {/* Filtrar productos por categoría */}
             <MenuCategory title="ENTRANTES" items={productos.filter(p => p.categoria === 'entrantes')} id="entrantes" onProductClick={setSelectedProduct} />
             <MenuCategory title="HAMBURGUESAS" items={productos.filter(p => p.categoria === 'hamburguesas')} id="burgers" onProductClick={setSelectedProduct} />
             <MenuCategory title="POSTRES" items={productos.filter(p => p.categoria === 'postres')} id="postres" onProductClick={setSelectedProduct} />
-            {/* Botón para ver pedido */}
             <div style={{textAlign: 'center', margin: '32px 0'}}>
               <button 
                 className="ver-pedido-btn-destacado"
@@ -323,7 +359,6 @@ function App() {
                 Ver pedido
               </button>
             </div>
-            {/* Modal del pedido */}
             {pedidoVisible && (
               <div className="pedido-modal-bg" onClick={() => setPedidoVisible(false)}>
                 <div className="pedido-modal" onClick={e => e.stopPropagation()}>
@@ -337,7 +372,7 @@ function App() {
                         <li key={idx}>
                           <button className="pedido-modal-remove" onClick={() => handleRemoveFromPedido(idx)} title="Eliminar">✕</button>
                           <span className="pedido-modal-item-title">{item.title}</span>
-                          <span className="pedido-modal-item-price">{item.price}</span>
+                          <span className="pedido-modal-item-price">{String(item.price).includes('€') ? item.price : `${item.price} €`}</span>
                         </li>
                       ))}
                     </ul>
@@ -357,9 +392,19 @@ function App() {
             )}
           </>
         )}
-        {/* Nueva cabecera para Reservas o CRUD Reservas */}
         {usuario.rol === 'admin' ? (
           <>
+            <div className="menu-header reservas-header" id="estadisticas">
+              <img src={logo} alt="Estadísticas Icon" className="menu-logo" />
+              <h2 className="menu-title">ESTADÍSTICAS</h2>
+            </div>
+            <div style={{marginBottom: 48}}>
+              <EstadisticasCharts
+                usuarios={usuariosAdmin}
+                tickets={ticketsAdmin}
+                reservas={reservasAdmin}
+              />
+            </div>
             <div className="menu-header reservas-header" id="usuarios">
               <img src={logo} alt="Usuarios Icon" className="menu-logo" />
               <h2 className="menu-title">USUARIOS</h2>
@@ -372,6 +417,7 @@ function App() {
                   { key: "id", label: "ID" },
                   { key: "nombre", label: "Nombre" },
                   { key: "email", label: "Email" },
+                  { key: "rol", label: "Rol" },
                   { key: "fechaRegistro", label: "Fecha Registro", format: v => v ? new Date(v).toLocaleDateString('es-ES') : '' },
                 ]}
                 addLabel="Añadir usuario"
@@ -386,14 +432,12 @@ function App() {
                 endpoint="/reservas"
                 title="Reservas"
                 columns={[
-                  // { key: "id", label: "ID" }, // oculto
                   { key: "nombre", label: "Nombre" },
                   { key: "email", label: "Email" },
                   { key: "fecha", label: "Fecha", format: v => v ? new Date(v).toLocaleDateString('es-ES') : '' },
                   { key: "hora", label: "Hora", format: v => v ? v.slice(0,5) : '' },
                   { key: "personas", label: "Personas" },
                   { key: "comentario", label: "Comentario" },
-                  // { key: "usuarioId", label: "Usuario ID" }, // oculto
                 ]}
                 addLabel="Añadir reserva"
               />
@@ -407,7 +451,6 @@ function App() {
                 endpoint="/tickets"
                 title="Pedidos"
                 columns={[
-                  // { key: "id", label: "ID" }, // oculto
                   { key: "usuarioNombre", label: "Usuario", format: (v, row) => row.usuarioNombre || row.usuarioId || '' },
                   { key: "numero", label: "Número" },
                   { key: "fecha", label: "Fecha", format: v => v ? new Date(v).toLocaleDateString('es-ES') : '' },
@@ -429,12 +472,53 @@ function App() {
                   { key: "id", label: "ID" },
                   { key: "categoria", label: "Categoría" },
                   { key: "title", label: "Nombre" },
-                  { key: "price", label: "Precio" },
+                  { key: "price", label: "Precio", format: v => v !== undefined && v !== null ? `${v} €` : "" },
                   { key: "description", label: "Descripción" },
                   { key: "image", label: "Imagen" },
                   { key: "modalImage", label: "Imagen real" },
                 ]}
                 addLabel="Añadir producto"
+              />
+            </div>
+          </>
+        ) : usuario.rol === 'empleado' ? (
+          <>
+           
+            <div className="menu-header reservas-header" id="pedidos-empleado">
+              <img src={logo} alt="Pedidos Icon" className="menu-logo" />
+              <h2 className="menu-title">PEDIDOS</h2>
+            </div>
+            <div style={{marginBottom: 48}}>
+              <CrudTable
+                endpoint="/tickets"
+                title="Pedidos"
+                columns={[
+                  { key: "usuarioNombre", label: "Usuario", format: (v, row) => row.usuarioNombre || row.usuarioId || '' },
+                  { key: "numero", label: "Número" },
+                  { key: "fecha", label: "Fecha", format: v => v ? new Date(v).toLocaleDateString('es-ES') : '' },
+                  { key: "hora", label: "Hora", format: v => v ? v.slice(0,5) : '' },
+                  { key: "total", label: "Total", format: v => Number(v).toFixed(2) + ' €' },
+                ]}
+                addLabel={null}
+              />
+            </div>
+            <div className="menu-header reservas-header" id="reservas-empleado">
+              <img src={logo} alt="Reservas Icon" className="menu-logo" />
+              <h2 className="menu-title">RESERVAS</h2>
+            </div>
+            <div style={{marginBottom: 48}}>
+              <CrudTable
+                endpoint="/reservas"
+                title="Reservas"
+                columns={[
+                  { key: "nombre", label: "Nombre" },
+                  { key: "email", label: "Email" },
+                  { key: "fecha", label: "Fecha", format: v => v ? new Date(v).toLocaleDateString('es-ES') : '' },
+                  { key: "hora", label: "Hora", format: v => v ? v.slice(0,5) : '' },
+                  { key: "personas", label: "Personas" },
+                  { key: "comentario", label: "Comentario" },
+                ]}
+                addLabel={null}
               />
             </div>
           </>
@@ -444,15 +528,25 @@ function App() {
               <img src={logo} alt="Reservation Icon" className="menu-logo" />
               <h2 className="menu-title">RESERVAS</h2>
             </div>
-            <ReservationSection />
-            <CalendarSection />
-            <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToPedido={handleAddToPedido} />
+            <ReservationSection onReservaCreada={handleReservaCreada} />
+            <CalendarSection reservasTrigger={reservasTrigger} />
+            {selectedProduct && (
+              <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                  <button className="modal-close" onClick={() => setSelectedProduct(null)}>&times;</button>
+                  {isBurgerLab ? (
+                    <BurgerLabCustomizer onAddToPedido={handleAddToPedido} />
+                  ) : (
+                    <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToPedido={handleAddToPedido} />
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
 
-      {/* Apartado Último pedido o nada para admin */}
-      {usuario.rol !== 'admin' && (
+      {usuario.rol !== 'admin' && usuario.rol !== 'empleado' && (
         <section className="menu-section" id="mis-pedidos">
           <div className="menu-header">
             <img src={logo} alt="Ticket Icon" className="menu-logo" />
@@ -475,7 +569,7 @@ function App() {
                   {(ultimoTicket.productos || []).map((prod, idx) => (
                     <div className="ticket-producto" key={idx}>
                       <span className="ticket-prod-nombre">{prod.title}</span>
-                      <span className="ticket-prod-precio">{prod.price}</span>
+                      <span className="ticket-prod-precio">{String(prod.price).includes('€') ? prod.price : `${prod.price} €`}</span>
                     </div>
                   ))}
                 </div>
@@ -485,16 +579,94 @@ function App() {
                   <span>{Number(ultimoTicket.total).toFixed(2)} €</span>
                 </div>
                 <div className="ticket-footer">¡Gracias por tu compra!</div>
+                <button
+                  style={{
+                    marginTop: 18,
+                    background: '#e63946',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '10px 28px',
+                    fontWeight: 700,
+                    fontSize: '1.08rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px #e6394633',
+                    fontFamily: 'Chewy, system-ui',
+                    letterSpacing: 1,
+                    width: '100%'
+                  }}
+                  onClick={() => descargarTicketUltimoPedido(ultimoTicket, usuario)}
+                >
+                  Descargar ticket
+                </button>
               </div>
             </div>
           ) : (
-            <div style={{textAlign: 'center', margin: '32px 0', color: '#e63946', fontFamily: 'Chewy, system-ui', fontSize: '1.3rem', fontWeight: 600}}>
-              Haz tu primer pedido
+            <div style={{textAlign: 'center', margin: '32px 0', color: '#fff', fontFamily: 'Chewy, system-ui', fontSize: '1.3rem', fontWeight: 600}}>
+              <div style={{marginBottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14}}>
+                <img src={shoppingBag} alt="Bolsa" style={{width: 92, height: 92, marginBottom: 14, objectFit: 'contain', filter: 'brightness(0) invert(1)'}} />
+                <div style={{fontWeight: 900, fontSize: '2.1rem', marginBottom: 4, color: '#fff', lineHeight: 1.1}}>Aún no has realizado pedidos</div>
+                <div style={{fontWeight: 400, fontSize: '1.25rem', color: '#fff', lineHeight: 1.2}}>Explora nuestro menú y haz tu primera selección</div>
+              </div>
+              <div style={{
+                margin: '0 auto',
+                maxWidth: 900,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 0
+              }}>
+                <h4 style={{
+                  color: '#C13A3A',
+                  fontFamily: 'Chewy, system-ui',
+                  fontSize: '1.45rem',
+                  fontWeight: 900,
+                  marginBottom: 22,
+                  letterSpacing: 1,
+                  textShadow: '0 2px 8px #f4c2c2cc, 0 1px 0 #fff',
+                  textTransform: 'uppercase',
+                  background: 'linear-gradient(90deg,#fff,#f4c2c2 60%,#fff)',
+                  borderRadius: 8,
+                  padding: '8px 24px',
+                  display: 'inline-block',
+                  boxShadow: '0 2px 8px #c13a3a11'
+                }}>Recomendaciones populares</h4>
+                <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 24}}>
+                  {['Nachos', 'Bestia Nuclear', 'Fusión Tropical', 'Tarta de Pantera Rosa'].map((nombre, idx) => {
+                    const prod = productos.find(p => p.title === nombre);
+                    if (!prod) return null;
+                    let hash = '#inicio';
+                    if (prod.categoria === 'entrantes') hash = '#inicio';
+                    else if (prod.categoria === 'hamburguesas') hash = '#inicio';
+                    else if (prod.categoria === 'postres') hash = '#inicio';
+                    return (
+                      <div key={prod.id || prod.title || idx} style={{
+                        background: '#f4c2c2',
+                        borderRadius: 14,
+                        boxShadow: '0 2px 8px #c13a3a22',
+                        border: '2px solid #fff',
+                        padding: 18,
+                        minWidth: 140,
+                        maxWidth: 180,
+                        margin: 8,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        transition: 'transform 0.15s, box-shadow 0.15s',
+                      }} onClick={() => { window.location.hash = hash; }}>
+                        <img src={prod.image} alt={prod.title} style={{width: 80, height: 80, objectFit: 'cover', borderRadius: 10, marginBottom: 10, background: '#fff'}} />
+                        <span style={{fontWeight: 700, color: '#C13A3A', fontFamily: 'Chewy, system-ui', fontSize: '1.1rem', marginBottom: 2, letterSpacing: 0.5}}>{prod.title}</span>
+                        <span style={{color: '#111', fontSize: '1rem', marginTop: 4}}>{String(prod.price).includes('€') ? prod.price : `${prod.price} €`}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </section>
       )}
-      {/* Modal de perfil de usuario */}
       {showPerfilModal && usuario && (
         <div className="perfil-modal-bg" onClick={() => setShowPerfilModal(false)} style={{
           position: 'fixed',
@@ -537,32 +709,109 @@ function App() {
             }}>Perfil de Usuario</h3>
             <form onSubmit={async e => {
               e.preventDefault();
+              const errores = {};
+              if (!editNombre || editNombre.trim().length < 2) {
+                errores.nombre = 'El nombre es obligatorio y debe tener al menos 2 caracteres.';
+              }
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!editEmail || !emailRegex.test(editEmail)) {
+                errores.email = 'Introduce un email válido.';
+              }
+              setErroresPerfil(errores);
+              if (Object.keys(errores).length > 0) return;
               try {
-                await api.put(`/users/${usuario.id}`, { nombre: editNombre, email: editEmail });
-                setUsuario({ ...usuario, nombre: editNombre, email: editEmail });
-                localStorage.setItem('usuario', JSON.stringify({ ...usuario, nombre: editNombre, email: editEmail }));
+                await api.put(`/users/${usuario.id}`, { nombre: editNombre, email: editEmail, fotoPerfil });
+                const updatedUser = { ...usuario, nombre: editNombre, email: editEmail, fotoPerfil };
+                setUsuario(updatedUser);
+                localStorage.setItem('usuario', JSON.stringify(updatedUser));
                 setShowPerfilModal(false);
-                setMensaje('Datos actualizados correctamente');
+                setMensaje({ texto: 'Datos actualizados correctamente', color: '#218838' });
+                setErroresPerfil({});
               } catch (err) {
-                setMensaje('Error al actualizar los datos');
+                if (err.response && err.response.data && err.response.data.error && err.response.data.error.includes('email')) {
+                  setErroresPerfil({ email: 'Este email ya está registrado.' });
+                } else {
+                  setMensaje({ texto: 'Error al actualizar los datos', color: '#e63946' });
+                }
               }
             }}>
-              <div className="perfil-modal-info" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="perfil-modal-info" style={{ display: 'flex', flexDirection: 'column', gap: 22, marginTop: 10, marginBottom: 10 }}>
                 <label style={{ fontWeight: 600, color: '#222' }}>Nombre:
                   <input type="text" value={editNombre} onChange={e => setEditNombre(e.target.value)} style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid #ccc', marginTop: 4 }} required minLength={2} />
+                  {erroresPerfil.nombre && (
+                    <div style={{ color: '#e63946', fontSize: '0.98rem', marginTop: 2, fontWeight: 500 }}>{erroresPerfil.nombre}</div>
+                  )}
                 </label>
                 <label style={{ fontWeight: 600, color: '#222' }}>Email:
                   <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid #ccc', marginTop: 4 }} required />
+                  {erroresPerfil.email && (
+                    <div style={{ color: '#e63946', fontSize: '0.98rem', marginTop: 2, fontWeight: 500 }}>{erroresPerfil.email}</div>
+                  )}
                 </label>
-                {/* Eliminar número de pedidos e historial para administradores */}
+                <div style={{ margin: '10px 0 0 0' }}>
+                  <label style={{ fontWeight: 600, color: '#222', marginBottom: 4, display: 'block' }}>Foto de perfil:</label>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {imagenesPerfil.map(img => (
+                      <img
+                        key={img}
+                        src={`/src/assets/fotoperfil/${img}`}
+                        alt={img}
+                        onClick={() => setFotoPerfil(img)}
+                        style={{
+                          width: 54,
+                          height: 54,
+                          borderRadius: '50%',
+                          border: fotoPerfil === img ? '3px solid #e63946' : '2px solid #ccc',
+                          cursor: 'pointer',
+                          objectFit: 'cover',
+                          boxShadow: fotoPerfil === img ? '0 2px 8px #e63946aa' : '0 1px 4px #aaa2',
+                          transition: 'border 0.2s, box-shadow 0.2s',
+                          background: '#fff',
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
                 {usuario.rol !== 'admin' && (
                   <div><b style={{ color: '#e63946' }}>Rol:</b> <span style={{ color: '#e63946', fontWeight: 700 }}>{usuario.rol}</span></div>
                 )}
                 {usuario.rol === 'admin' && (
                   <div><b style={{ color: '#e63946' }}>Rol:</b> <span style={{ color: '#e63946', fontWeight: 700 }}>admin</span></div>
                 )}
+                {usuario.rol !== 'admin' && usuario.rol !== 'empleado' && (
+                  <div style={{ color: '#e63946', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <b>Número de pedidos:</b> <span>{numPedidos}</span>
+                    <button
+                      type="button"
+                      style={{
+                        marginLeft: 8,
+                        background: '#fff',
+                        color: '#e63946',
+                        border: '1.5px solid #e63946',
+                        borderRadius: 7,
+                        padding: '4px 14px',
+                        fontFamily: 'Chewy, system-ui',
+                        fontSize: '1.05rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 4px rgba(230,57,70,0.10)'
+                      }}
+                      onClick={async () => {
+                        if (!showHistorial) {
+                          try {
+                            const res = await api.get(`/tickets?usuarioId=${usuario.id}`);
+                            setHistorialPedidos(res.data);
+                          } catch {
+                            setHistorialPedidos([]);
+                          }
+                        }
+                        setShowHistorial(true);
+                      }}
+                    >Historial de pedidos</button>
+                  </div>
+                )}
               </div>
-              <div style={{ display: 'flex', gap: 16, marginTop: 18, justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: 28, marginTop: 32, justifyContent: 'center' }}>
                 <button type="submit" style={{
                   background: '#fff',
                   color: '#e63946',
@@ -591,7 +840,6 @@ function App() {
                 >Cerrar sesión</button>
               </div>
             </form>
-            {/* Modal de confirmación de logout */}
             {showLogoutConfirm && (
               <div style={{
                 position: 'fixed',
@@ -623,8 +871,8 @@ function App() {
                       localStorage.removeItem('usuario');
                       setShowPerfilModal(false);
                       setShowLogoutConfirm(false);
-                      setMensaje('Sesión cerrada');
-                      setTimeout(() => setMensaje(''), 5000);
+                      setMensaje({ texto: 'Sesión cerrada correctamente', color: '#218838' });
+                      setTimeout(() => setMensaje(null), 5000);
                     }}
                       style={{
                         background: '#e63946',
@@ -657,31 +905,36 @@ function App() {
                 </div>
               </div>
             )}
-            {/* Modal historial de pedidos */}
             {showHistorial && (
-              <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-                background: 'rgba(0,0,0,0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 6000
-              }}>
-                <div style={{
-                  background: '#fff',
-                  borderRadius: 16,
-                  padding: '32px 24px',
-                  minWidth: 340,
-                  maxWidth: 420,
-                  maxHeight: '80vh',
-                  overflowY: 'auto',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-                  position: 'relative'
-                }}>
+              <div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100vw',
+                  height: '100vh',
+                  background: 'rgba(0,0,0,0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 6000
+                }}
+                onClick={() => setShowHistorial(false)}
+              >
+                <div
+                  style={{
+                    background: '#fff',
+                    borderRadius: 16,
+                    padding: '32px 24px',
+                    minWidth: 340,
+                    maxWidth: 420,
+                    maxHeight: '80vh',
+                    overflowY: 'auto',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+                    position: 'relative'
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
                   <button onClick={() => setShowHistorial(false)} style={{
                     position: 'absolute',
                     top: 10,
@@ -717,7 +970,7 @@ function App() {
                           {(ticket.productos || []).map((prod, i) => (
                             <div className="ticket-producto" key={i}>
                               <span className="ticket-prod-nombre">{prod.title}</span>
-                              <span className="ticket-prod-precio">{prod.price}</span>
+                              <span className="ticket-prod-precio">{String(prod.price).includes('€') ? prod.price : `${prod.price} €`}</span>
                             </div>
                           ))}
                         </div>
@@ -745,10 +998,8 @@ function App() {
   );
 }
 
-// 3. Export principal con router
 function AppWithRouter() {
   const [mensajeRegistro, setMensajeRegistro] = React.useState("");
-  // Wrapper para usar useNavigate en rutas element
   function LoginRouteWrapper(props) {
     const navigate = useNavigate();
     const [mensajeLogin, setMensajeLogin] = React.useState("");
@@ -763,7 +1014,6 @@ function AppWithRouter() {
         onLogin={user => {
           setMensajeLogin('¡Inicio de sesión exitoso!');
           setTimeout(() => setMensajeLogin(''), 5000);
-          // Navegar solo tras cerrar el modal (ahora lo hace la página)
           navigate("/");
         }}
       />
@@ -773,7 +1023,6 @@ function AppWithRouter() {
     const navigate = useNavigate();
     return <RegisterPage {...props} onRegister={(user) => {
       setMensajeRegistro('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.');
-      // Navegar solo tras cerrar el modal (ahora lo hace la página)
       navigate("/login");
     }} />;
   }
@@ -786,6 +1035,50 @@ function AppWithRouter() {
       </Routes>
     </Router>
   );
+}
+
+function descargarTicketUltimoPedido(ticket, usuario) {
+  const fecha = ticket.fecha ? new Date(ticket.fecha) : new Date();
+  const fechaStr = fecha.toLocaleDateString();
+  const horaStr = ticket.hora || fecha.toLocaleTimeString();
+  let contenido = '';
+  contenido += '        BURGERLAB\n';
+  contenido += '   Av. de la Hamburguesa 123\n';
+  contenido += '      Tel: 900 123 456\n';
+  contenido += '------------------------------\n';
+  contenido += `Nº Pedido: ${ticket.numero}\n`;
+  contenido += `Fecha: ${fechaStr}  Hora: ${horaStr}\n`;
+  contenido += `Email: ${usuario?.email || ''}\n`;
+  contenido += '------------------------------\n';
+  contenido += 'Cant  Producto           Precio\n';
+  contenido += '------------------------------\n';
+  (ticket.productos || []).forEach((item) => {
+    const cantidad = item.cantidad || 1;
+    let nombre = item.title;
+    if (nombre.length > 16) nombre = nombre.slice(0, 13) + '...';
+    else nombre = nombre.padEnd(16, ' ');
+    let precio = String(item.price).replace('€','').trim();
+    if (!precio.includes('.')) precio += '.00';
+    precio = precio.padStart(6, ' ');
+    contenido += `${cantidad.toString().padStart(2,' ')}   ${nombre}${precio} €\n`;
+  });
+  contenido += '------------------------------\n';
+  contenido += `TOTAL:${Number(ticket.total).toFixed(2).padStart(21,' ')} €\n`;
+  contenido += '------------------------------\n';
+  contenido += '   ¡Gracias por tu pedido!\n';
+  contenido += '        www.burgerlab.com\n';
+  contenido += '------------------------------\n';
+  const blob = new Blob([contenido], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ticket_pedido_burgerlab_${ticket.numero || fecha.getTime()}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 0);
 }
 
 export default AppWithRouter;

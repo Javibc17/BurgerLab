@@ -1,8 +1,7 @@
-// Modelo de producto para BurgerLab
 const mongoose = require('mongoose');
 
 const productoSchema = new mongoose.Schema({
-  categoria: String, // hamburguesas, entrantes, postres, etc.
+  categoria: String,
   title: String,
   price: String,
   description: String,

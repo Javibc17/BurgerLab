@@ -1,4 +1,3 @@
-// Modelo de reserva para BurgerLab
 const mongoose = require('mongoose');
 
 const reservaSchema = new mongoose.Schema({

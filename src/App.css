@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
 
 
 body {
@@ -6,7 +7,7 @@ body {
   font-weight: 400;
   font-style: normal;
   margin: 0;
-  background-color: #e63946;
+  background-color: #D74343;
   color: #f4c2c2; 
   overflow-x: hidden;
 }
@@ -21,7 +22,7 @@ body {
 }
 
 .shadow-container {
-  background-color: #e63946;
+  background-color: #D74343;
   border-radius: 10px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   padding: 50px; 
@@ -110,7 +111,7 @@ body {
   position: absolute;
   top: 100%;
   left: 0;
-  background: #e63946;
+  background: #D74343;
   border-radius: 10px; /* Solo esquinas superior e inferior */
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   min-width: 180px;
@@ -146,7 +147,7 @@ body {
 
 .dropdown-menu a:hover {
   background: #f4c2c2;
-  color: #e63946;
+  color: #D74343;
 }
 
 /* Centrado absoluto del logo en el inicio */
@@ -185,7 +186,7 @@ body {
 .menu-section {
   margin-top: 50px;
   padding: 20px;
-  background-color: #e63946;
+  background-color: #D74343;
   color: #f4c2c2; /* Rosa palo */
   text-align: center;
   width: 100%;
@@ -215,7 +216,7 @@ body {
 .menu-title {
   font-size: 58px;
   font-weight: bold;
-  color: #e63946; /* Color diferente para el texto */
+  color: #D74343; /* Color diferente para el texto */
   text-transform: uppercase; /* Texto en mayúsculas */
   letter-spacing: 2px; /* Espaciado entre letras */
 }
@@ -223,14 +224,15 @@ body {
 /* Estilo para las categorías del menú */
 .menu-categories {
   display: flex;
-  flex-direction: column; /* Asegura que el título esté arriba */
-  align-items: center; /* Centra el título horizontalmente */
-  gap: 20px; /* Espaciado entre el título y los productos */
-  margin-bottom: 40px; /* Espaciado entre categorías */
+  flex-direction: column;
+  align-items: center;
+  gap: 90px; /* Aún más espacio entre categorías */
+  margin-bottom: 90px;
 }
 
 .menu-category {
-  width: 100%; /* Asegura que ocupe todo el ancho disponible */
+  width: 100%;
+  margin-bottom: 90px; /* Aún más espacio entre secciones */
 }
 
 .category-title {
@@ -255,7 +257,7 @@ body {
   padding: 10px;
   border-radius: 8px;
   background-color: #f4c2c2;
-  color: #e63946;
+  color: #D74343;
   width: 150px; /* Ancho fijo para los productos */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
   transition: transform 0.2s, box-shadow 0.2s; /* Transición para hover */
@@ -294,22 +296,25 @@ body {
 }
 .modal-content {
   background: #f4c2c2;
-  color: #e63946;
+  color: #D74343;
   border-radius: 18px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   padding: 40px 32px 32px 32px;
-  min-width: 320px;
   max-width: 95vw;
   max-height: 90vh;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+  animation: modalFadeIn 0.38s ease;
+  overflow: hidden;
 }
 @keyframes modalIn {
-  from { transform: scale(0.85) translateY(40px); opacity: 0; }
-  to { transform: scale(1) translateY(0); opacity: 1; }
+  /* Eliminada la animación para que no haya efecto */
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .modal-img {
   width: 180px;
@@ -322,6 +327,7 @@ body {
   font-size: 2.2rem;
   font-family: 'Chewy', system-ui;
   margin-bottom: 10px;
+  color: #D74343;
 }
 .modal-price {
   font-size: 1.3rem;
@@ -340,7 +346,7 @@ body {
   background: none;
   border: none;
   font-size: 2.2rem;
-  color: #e63946;
+  color: #D74343;
   cursor: pointer;
   font-family: inherit;
   transition: color 0.2s;
@@ -371,7 +377,7 @@ body {
   margin-bottom: 0;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
   background: #fff;
-  border: 2px solid #e63946;
+  border: 2px solid #D74343;
 }
 .modal-info {
   display: flex;
@@ -385,7 +391,7 @@ body {
   font-size: 2.2rem;
   font-family: 'Chewy', system-ui;
   margin-bottom: 10px;
-  color: #e63946;
+  color: #D74343;
   letter-spacing: 1px;
 }
 .modal-price {
@@ -429,7 +435,7 @@ body {
 
 .modal-section-title {
   font-family: 'Chewy', system-ui;
-  color: #e63946;
+  color: #D74343;
   font-size: 1.25rem;
   margin: 18px 0 4px 0;
   letter-spacing: 1px;
@@ -458,6 +464,7 @@ body {
   gap: 38px;
   min-width: 340px;
   max-width: 800px;
+  min-height: 320px;
 }
 @media (max-width: 900px) {
   .modal-flex-v2 {
@@ -479,7 +486,7 @@ body {
 .modal-title-v2 {
   font-size: 2.3rem;
   margin-bottom: 10px;
-  color: #e63946;
+  color: #D74343;
   letter-spacing: 1px;
   text-align: left;
   width: 100%;
@@ -513,14 +520,14 @@ body {
   min-width: 110px;
   text-align: right;
   height: 48px;
-  border-right: 1.5px solid #e63946;
+  border-right: 1.5px solid #D74343;
 }
 .modal-add-btn {
   display: flex;
   align-items: center;
   background: #f4c2c2;
-  color: #e63946;
-  border: 3px solid #e63946;
+  color: #D74343;
+  border: 3px solid #D74343;
   border-radius: 16px;
   font-size: 1.15rem;
   font-family: 'Chewy', system-ui;
@@ -530,11 +537,11 @@ body {
   animation: verPedidoGlow 1.2s infinite alternate;
 }
 .modal-add-btn:hover {
-  background: #e63946;
+  background: #D74343;
   color: #fff;
   border-color: #f4c2c2;
   transform: scale(1.06) rotate(-1deg);
-  box-shadow: 0 6px 24px #e6394699, 0 0 24px #f4c2c2cc;
+  box-shadow: 0 6px 24px #D7434399, 0 0 24px #f4c2c2cc;
 }
 @media (max-width: 700px) {
   .modal-bottom-row {
@@ -580,8 +587,8 @@ body {
   display: flex;
   align-items: center;
   background: #f4c2c2;
-  color: #e63946;
-  border: 3px solid #e63946;
+  color: #D74343;
+  border: 3px solid #D74343;
   border-radius: 16px;
   font-size: 1.15rem;
   font-family: 'Chewy', system-ui;
@@ -591,11 +598,11 @@ body {
   animation: verPedidoGlow 1.2s infinite alternate;
 }
 .modal-add-btn:hover {
-  background: #e63946;
+  background: #D74343;
   color: #fff;
   border-color: #f4c2c2;
   transform: scale(1.06) rotate(-1deg);
-  box-shadow: 0 6px 24px #e6394699, 0 0 24px #f4c2c2cc;
+  box-shadow: 0 6px 24px #D7434399, 0 0 24px #f4c2c2cc;
 }
 @media (max-width: 700px) {
   .modal-bottom-row-horizontal {
@@ -635,7 +642,7 @@ body {
   text-align: center;
   margin: 0 auto 1.5rem auto;
   font-weight: bold;
-  color: #e63946;
+  color: #D74343;
   border-radius: 18px;
   padding: 8px 32px 6px 32px;
   box-shadow: 0 2px 12px rgba(230,57,70,0.10);
@@ -654,7 +661,7 @@ body {
 
 .footer {
   background-color: #f4c2c2; 
-  color: #e63946; /* Texto en rojo */
+  color: #D74343; /* Texto en rojo */
   text-align: center;
   padding: 40px 20px;
   margin-top: 20px;
@@ -683,7 +690,7 @@ body {
 .footer-section h4 {
   font-size: 20px;
   margin-bottom: 10px;
-  color: #e63946; /* Títulos en rojo */
+  color: #D74343; /* Títulos en rojo */
 }
 
 .footer-section p,
@@ -702,7 +709,7 @@ body {
 }
 
 .footer-section ul li a {
-  color: #e63946; /* Enlaces en rojo */
+  color: #D74343; /* Enlaces en rojo */
   text-decoration: none;
 }
 
@@ -723,7 +730,7 @@ body {
 }
 
 .footer-content a {
-  color: #e63946; /* Enlaces en rojo */
+  color: #D74343; /* Enlaces en rojo */
   text-decoration: none;
   margin: 0 5px;
 }
@@ -735,7 +742,7 @@ body {
 
 .footer-copyright {
   font-size: 14px;
-  color: #e63946; /* Texto en rojo */
+  color: #D74343; /* Texto en rojo */
   width: 100%; /* Ocupa todo el ancho */
   text-align: center; /* Centra el texto */
   margin-top: auto; /* Empuja el copyright hacia abajo */
@@ -783,7 +790,7 @@ body {
 /* Cambiar el color de fondo y el borde de los inputs */
 .reservation-form input {
   background-color: #B03535; /* Cambia el color de fondo */
-  border: 2px solid #e63946; /* Cambia el color del borde */
+  border: 2px solid #D74343; /* Cambia el color del borde */
   padding: 10px;
   font-size: 1rem;
   border-radius: 5px;
@@ -791,7 +798,7 @@ body {
 }
 
 .reservation-form input::placeholder {
-  color: #e63946; /* Cambia el color del texto del placeholder */
+  color: #D74343; /* Cambia el color del texto del placeholder */
 }
 
 .reservation-form input:focus {
@@ -822,14 +829,14 @@ body {
   padding: 10px 20px;
   font-size: 1rem;
   background-color: #f4c2c2;
-  color: #e63946;
+  color: #D74343;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
 .reservation-button:hover {
-  background-color: #e63946;
+  background-color: #D74343;
   border:solid 1px #f4c2c2;
   color: #f4c2c2;
 }
@@ -847,7 +854,7 @@ body {
 
 .login-btn {
   margin-left: 40px;
-  background: #e63946;
+  background: #D74343;
   border: 2px solid #f4c2c2;
   border-radius: 10px;
   padding: 8px 18px 6px 10px;
@@ -869,12 +876,12 @@ body {
 
 .login-btn:hover {
   background: #f4c2c2;
-  border: 2px solid #e63946;
+  border: 2px solid #D74343;
   box-shadow: 0 4px 16px rgba(230,57,70,0.25);
 }
 
 .login-btn:hover svg {
-  stroke: #e63946;
+  stroke: #D74343;
 }
 
 .login-text {
@@ -889,7 +896,7 @@ body {
 }
 
 .login-btn:hover .login-text {
-  color: #e63946;
+  color: #D74343;
 }
 
 .login-li {
@@ -940,14 +947,14 @@ body {
   background: none;
   border: none;
   font-size: 2.2rem;
-  color: #e63946;
+  color: #D74343;
   cursor: pointer;
   z-index: 2200;
 }
 .pedido-modal-title {
   text-align: center;
   margin: 0 0 12px 0;
-  color: #e63946;
+  color: #D74343;
   font-size: 1.5rem;
 }
 .pedido-modal-list {
@@ -964,7 +971,7 @@ body {
 }
 .pedido-modal-remove {
   margin-right: 8px;
-  background: #e63946;
+  background: #D74343;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -985,7 +992,7 @@ body {
 }
 .pedido-modal-hr {
   margin: 10px 0 10px 0;
-  border-color: #e63946;
+  border-color: #D74343;
   width: 100%;
 }
 .pedido-modal-total {
@@ -993,13 +1000,13 @@ body {
   justify-content: space-between;
   font-weight: bold;
   font-size: 1.1rem;
-  color: #e63946;
+  color: #D74343;
   width: 100%;
 }
 .pedido-modal-btn {
   margin-top: 14px;
   width: 100%;
-  background: #e63946;
+  background: #D74343;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1011,33 +1018,90 @@ body {
   box-shadow: 0 2px 8px rgba(230,57,70,0.10);
 }
 
-.ver-pedido-btn-destacado {
-  background: #f4c2c2;
+/* Pedido (Carrito) estilos extraídos de Pedido.jsx */
+.pedido-lista {
+  background: #fff;
   color: #e63946;
-  border: 3px solid #e63946;
-  border-radius: 16px;
-  padding: 16px 44px;
-  font-size: 1.45rem;
-  font-family: 'Chewy', system-ui;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.18), 0 0 16px #f4c2c288;
-  transition: transform 0.15s, box-shadow 0.15s, background 0.18s, color 0.18s;
-  animation: verPedidoGlow 1.2s infinite alternate;
+  border-radius: 12px;
+  padding: 32px;
+  min-width: 280px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  margin: 0 auto;
+  position: static;
+  left: unset;
+  top: unset;
+  z-index: 10;
 }
-.ver-pedido-btn-destacado:hover {
+.pedido-lista-grande {
+  min-width: 520px;
+  max-width: 700px;
+}
+.pedido-lista-title {
+  text-align: center;
+  margin-bottom: 18px;
+  color: #e63946;
+}
+.pedido-lista-vacio {
+  text-align: center;
+  color: #e63946;
+}
+.pedido-lista-ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.pedido-lista-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.pedido-lista-remove {
+  margin-right: 12px;
   background: #e63946;
   color: #fff;
-  border-color: #f4c2c2;
-  transform: scale(1.06) rotate(-1deg);
-  box-shadow: 0 6px 24px #e6394699, 0 0 24px #f4c2c2cc;
+  border: none;
+  border-radius: 6px;
+  padding: 2px 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.pedido-lista-item-title {
+  /* Hereda estilos, puedes personalizar si lo deseas */
+}
+.pedido-lista-hr {
+  margin: 18px 0;
+  border-color: #e63946;
+}
+.pedido-lista-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #e63946;
+}
+.pedido-lista-confirm {
+  margin-top: 24px;
+  width: 100%;
+  background: #e63946;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1.15rem;
+  font-family: 'Chewy', system-ui;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(230,57,70,0.10);
 }
 @keyframes verPedidoGlow {
   from {
     box-shadow: 0 0 8px #f4c2c288, 0 2px 8px rgba(230,57,70,0.10);
   }
   to {
-    box-shadow: 0 0 24px #e63946cc, 0 4px 18px #f4c2c2cc;
+    box-shadow: 0 0 24px #D74343cc, 0 4px 18px #f4c2c2cc;
   }
 }
 
@@ -1050,14 +1114,14 @@ body {
 }
 .ticket-realista {
   background: #fff;
-  border: 2.5px dashed #e63946;
+  border: 2.5px dashed #D74343;
   border-radius: 18px;
   box-shadow: 0 6px 32px rgba(230,57,70,0.13);
   padding: 32px 32px 18px 32px;
   min-width: 320px;
   max-width: 380px;
   font-family: 'Chewy', system-ui;
-  color: #e63946;
+  color: #D74343;
   position: relative;
   overflow: hidden;
 }
@@ -1076,7 +1140,7 @@ body {
 }
 .ticket-hr {
   border: none;
-  border-top: 2px dashed #e63946;
+  border-top: 2px dashed #D74343;
   margin: 12px 0;
 }
 .ticket-productos {
@@ -1215,4 +1279,74 @@ body {
   .crud-table-title {
     font-size: 1.1rem;
   }
+}
+
+/* Aplica Fredoka a textos generales e inputs, pero NO a títulos ni enlaces */
+body, p, span, label, input, textarea, select, button, .reservation-form input, .reservation-form textarea, .reservation-form select {
+  font-family: 'Fredoka', sans-serif;
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
+}
+
+/* Mantén la tipografía existente para títulos y enlaces */
+h1, h2, h3, h4, h5, h6, .reservation-title, .menu-title, .category-title, .modal-title, .modal-title-v2, .modal-title-center-large, a, .nav-links a, .ver-pedido-btn-destacado {
+  font-family: 'Chewy', system-ui, cursive;
+}
+
+.ver-pedido-btn-destacado {
+  background: #e63946;
+  color: #fff;
+  border: solid 2px white;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 1.25rem;
+  font-family: 'Chewy', system-ui;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(230,57,70,0.10);
+  transition: background 0.18s, color 0.18s, border 0.18s, transform 0.15s, box-shadow 0.15s;
+  margin: 0 auto;
+  display: inline-block;
+  animation: verPedidoGlow 1.2s infinite alternate;
+  min-height: 56px; /* Fijo para evitar salto visual */
+  min-width: 220px; /* Opcional: ancho mínimo para evitar que cambie mucho el tamaño */
+  line-height: 1.2;
+}
+.ver-pedido-btn-destacado:hover {
+  background: #fff;
+  color: #e63946;
+  border: 2px solid #e63946;
+  transform: scale(1.06) rotate(-1deg);
+  box-shadow: 0 6px 24px #D7434399, 0 0 24px #f4c2c2cc;
+}
+@media (max-width: 700px) {
+  .ver-pedido-btn-destacado {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 12px 0;
+    min-width: 0;
+  }
+}
+
+/* Scrollbar personalizado para .custom-scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e63946 #ffeaea;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  background: #ffeaea;
+  border-radius: 16px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(120deg, #e63946 60%, #f4c2c2 100%);
+  border-radius: 16px;
+  border: 2.5px solid #ffeaea;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(120deg, #d74343 60%, #e63946 100%);
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #ffeaea;
+  border-radius: 16px;
 }

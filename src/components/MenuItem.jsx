@@ -7,7 +7,9 @@ function MenuItem({ image, title, price }) {
       <div className="menu-item-info">
         <h4>{title}</h4>
       </div>
-      <span className="menu-item-price">{price}</span>
+      <span className="menu-item-price">
+        {String(price).includes("€") ? price : `${price} €`}
+      </span>
     </div>
   );
 }

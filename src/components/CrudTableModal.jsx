@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./CrudTable.css";
 import eyeIcon from '../assets/proicons--eye.svg';
 import eyeOffIcon from '../assets/proicons--eye-off.svg';
+import { validarEmail, validarPassword, validarNombre } from '../utils/validaciones';
+import { EXITOS } from '../utils/exitos';
 
 export default function CrudTableModal({
   open,
@@ -12,59 +14,96 @@ export default function CrudTableModal({
   isEdit = false,
   title = "",
   deleteMode = false,
-  deleteError // Agregado para recibir el mensaje de error de borrado
+  deleteError
 }) {
+  function normalizeDateInput(val) {
+    if (!val) return '';
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+    if (typeof val === 'string') {
+      if (val.includes('T')) return val.split('T')[0];
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+        const [d, m, y] = val.split('/');
+        return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+    }
+    return val;
+  }
+
   const [form, setForm] = useState(initialData);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    // Si no hay rol, poner 'cliente' por defecto al añadir
-    if (open && !isEdit && (!initialData.rol || initialData.rol === '')) {
-      setForm(f => ({ ...f, rol: 'cliente' }));
+    if (open && !isEdit) {
+      setForm({ rol: (!initialData.rol || initialData.rol === '') ? 'cliente' : initialData.rol });
     } else {
-      setForm(initialData);
+      let fecha = normalizeDateInput(initialData.fecha);
+      if (isEdit && columns.some(c => c.key === 'fecha') && columns.some(c => c.key === 'personas') && !columns.some(c => c.key === 'rol') && fecha) {
+        const [year, month, day] = fecha.split('-').map(Number);
+        const fechaObj = new Date(year, month - 1, day);
+        fechaObj.setDate(fechaObj.getDate() + 2);
+        fecha = fechaObj.toISOString().slice(0, 10);
+      }
+      setForm(f => ({ ...initialData, fecha }));
     }
     setErrors({});
-  }, [initialData, open, isEdit]);
+  }, [open, isEdit]);
 
-  // Simple validation rules (customize as needed)
   const validate = () => {
     const newErrors = {};
-    columns.forEach(col => {
-      if (col.key === "email" && form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
-        newErrors.email = "Email no válido";
+    if (!validarNombre(form.nombre)) {
+      newErrors.nombre = "El nombre debe tener al menos 2 caracteres.";
+    }
+    if (!validarEmail(form.email)) {
+      newErrors.email = "Introduce un email válido.";
+    }
+    if (endpointIsReserva()) {
+      if (!form.fecha) {
+        newErrors.fecha = "La fecha es obligatoria.";
       }
-      if (col.key === "nombre" && (!form.nombre || form.nombre.length < 2)) {
-        newErrors.nombre = "El nombre debe tener al menos 2 caracteres";
+      if (!form.hora) {
+        newErrors.hora = "La hora es obligatoria.";
       }
-      // Validaciones para productos
-      if (endpointIsProducto()) {
-        if (col.key === "categoria" && (!form.categoria || !['hamburguesas','entrantes','postres'].includes(form.categoria))) {
-          newErrors.categoria = "Selecciona una categoría válida";
-        }
-        if (col.key === "title" && (!form.title || form.title.length < 2)) {
-          newErrors.title = "El título debe tener al menos 2 caracteres";
-        }
-        if (col.key === "price" && (form.price === undefined || form.price === null || isNaN(Number(form.price)) || Number(form.price) <= 0)) {
-          newErrors.price = "El precio debe ser un número positivo";
-        }
-        if (col.key === "description" && (!form.description || form.description.length < 2)) {
-          newErrors.description = "La descripción debe tener al menos 2 caracteres";
-        }
-        if (col.key === "image" && (!form.image || form.image.length < 2)) {
-          newErrors.image = "La imagen es obligatoria";
+      if (!form.personas || isNaN(Number(form.personas))) {
+        newErrors.personas = "Introduce un número válido de personas.";
+      }
+      if (!validarEmail(form.email)) {
+        newErrors.email = "Introduce un email válido.";
+      }
+      if (!validarNombre(form.nombre)) {
+        newErrors.nombre = "El nombre debe tener al menos 2 caracteres.";
+      }
+      if (form.fecha && form.hora) {
+        const now = new Date();
+        const reservaDateTime = new Date(`${form.fecha}T${form.hora}`);
+        if (isNaN(reservaDateTime.getTime())) {
+          newErrors.fecha = "Fecha u hora no válida.";
+          newErrors.hora = "Fecha u hora no válida.";
+        } else if (reservaDateTime < now) {
+          newErrors.fecha = "No puedes reservar para una fecha u hora anterior a la actual.";
+          newErrors.hora = "No puedes reservar para una fecha u hora anterior a la actual.";
         }
       }
-      if (col.key === "rol" && !form.rol && !endpointIsProducto() && !endpointIsReserva()) {
-        newErrors.rol = "Selecciona un rol";
+      if (form.hora) {
+        const [h, m] = form.hora.split(":").map(Number);
+        const minutos = h * 60 + m;
+        const enHorarioMediodia = minutos >= 13 * 60 && minutos < 16 * 60;
+        const enHorarioNoche = minutos >= 20 * 60 && minutos < 24 * 60;
+        if (!enHorarioMediodia && !enHorarioNoche) {
+          newErrors.hora = "Solo puedes reservar entre 13:00-16:00 y 20:00-00:00.";
+        }
       }
-    });
-    // Validación de contraseña y confirmación SOLO al crear usuario
+      const personasNum = Number(form.personas);
+      if (!Number.isInteger(personasNum)) {
+        newErrors.personas = "El número de personas debe ser un número entero.";
+      } else if (personasNum < 1 || personasNum > 20) {
+        newErrors.personas = "El número de personas debe estar entre 1 y 20.";
+      }
+    }
     if (!isEdit && !endpointIsReserva() && !endpointIsProducto()) {
-      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{7,}$/;
-      if (!form.password || !passwordRegex.test(form.password)) {
+      if (!validarPassword(form.password)) {
         newErrors.password = "La contraseña debe tener más de 6 caracteres, al menos una mayúscula, un número y un símbolo";
       }
       if (!form.confirmPassword) {
@@ -73,12 +112,19 @@ export default function CrudTableModal({
         newErrors.confirmPassword = "Las contraseñas no coinciden";
       }
     }
+    if (!form.rol && !endpointIsProducto() && !endpointIsReserva()) {
+      newErrors.rol = "Selecciona un rol";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === 'fecha') {
+      setForm({ ...form, [e.target.name]: normalizeDateInput(e.target.value) });
+    } else {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = e => {
@@ -90,7 +136,6 @@ export default function CrudTableModal({
 
   if (!open) return null;
 
-  // Si es modo borrado, mostrar confirmación personalizada
   if (deleteMode) {
     return (
       <div className="crud-modal-bg" onClick={onClose}>
@@ -100,7 +145,6 @@ export default function CrudTableModal({
           <div style={{ fontSize: '1.15rem', color: '#e63946', fontWeight: 600, margin: '24px 0', textAlign: 'center' }}>
             ¿Seguro que quieres borrar este registro?
           </div>
-          {/* Mostrar mensaje de error en rojo si existe deleteError */}
           {deleteError && (
             <div className="crud-modal-error" style={{
               background: '#fff',
@@ -131,14 +175,11 @@ export default function CrudTableModal({
     );
   }
 
-  // Helper para saber si el endpoint es de reservas
   function endpointIsReserva() {
-    // Si columns tiene una clave "fecha" y "personas" y no tiene "rol", es reserva
     const keys = columns.map(c => c.key);
     return keys.includes("fecha") && keys.includes("personas") && !keys.includes("rol");
   }
 
-  // Helper para saber si el endpoint es de productos
   function endpointIsProducto() {
     const keys = columns.map(c => c.key);
     return keys.includes("categoria") && keys.includes("title") && keys.includes("price") && keys.includes("description") && keys.includes("image");
@@ -150,76 +191,41 @@ export default function CrudTableModal({
         <button className="crud-modal-close" onClick={onClose}>&times;</button>
         <h2 className="crud-modal-title">{title}</h2>
         <form onSubmit={handleSubmit} className="crud-modal-form">
-          {/* Campos principales del formulario */}
           {columns.filter(col => {
-            // Si el formulario es de productos, solo mostrar los campos clave
             if (endpointIsProducto()) {
               return [
                 "categoria","title","price","description","image","modalImage"
               ].includes(col.key);
             }
-            // Si el formulario es de reservas, ocultar password, confirmPassword y rol
-            if ((col.key === "password" || col.key === "confirmPassword" || col.key === "rol") && endpointIsReserva()) {
-              return false;
+            if (endpointIsReserva()) {
+              return [
+                "nombre","email","fecha","hora","personas","comentario"
+              ].includes(col.key);
             }
-            // Ocultar también el campo id en cualquier caso
-            if (col.key === "id") return false;
-            // Para usuarios, mostrar nombre y email (rol/password se fuerzan abajo)
+            if (columns.some(c => c.key === 'estado') && columns.some(c => c.key === 'usuarioId')) {
+              return col.key !== 'id';
+            }
             if (["nombre","email","fechaRegistro"].includes(col.key)) return true;
+            if (columns.some(c => c.key === 'numero') && columns.some(c => c.key === 'fecha') && columns.some(c => c.key === 'total')) {
+              return [
+                "numero","fecha","hora","total","usuarioId","productos"
+              ].includes(col.key);
+            }
             return false;
-          }).map(col => (
-            <div className="crud-modal-field" key={col.key}>
-              {endpointIsProducto() && col.key === "categoria" ? (
-                <>
-                  <label style={{ color: '#222' }}>Categoría<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
-                  <select
-                    name="categoria"
-                    value={form.categoria || ''}
-                    onChange={handleChange}
-                    className={errors.categoria ? "error" : ""}
-                  >
-                    <option value="">Selecciona una categoría</option>
-                    <option value="hamburguesas">Hamburguesas</option>
-                    <option value="entrantes">Entrantes</option>
-                    <option value="postres">Postres</option>
-                  </select>
-                  {errors.categoria && (
-                    <div className="crud-modal-error" style={{
-                      background: '#fff',
-                      color: '#e63946',
-                      border: '2px solid #e63946',
-                      borderRadius: 8,
-                      padding: '7px 14px',
-                      marginTop: 6,
-                      fontWeight: 700,
-                      fontSize: 15,
-                      boxShadow: '0 2px 8px #e6394633',
-                      letterSpacing: 0.2
-                    }}>{errors.categoria}</div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <label style={{ color: '#222' }}>
-                    {col.label}
-                    {/* Asterisco en obligatorios de productos */}
-                    {endpointIsProducto() && ["title","price","description","image"].includes(col.key) && (
-                      <span style={{ color: '#e63946', marginLeft: 4 }}>*</span>
-                    )}
-                    {/* Asterisco en obligatorios de usuarios */}
-                    {!endpointIsProducto() && ((col.key === "nombre") || (col.key === "email")) && (
-                      <span style={{ color: '#e63946', marginLeft: 4 }}>*</span>
-                    )}
-                  </label>
+          }).map(col => {
+            if (endpointIsReserva() && col.key === 'fecha') {
+              return (
+                <div className="crud-modal-field" key={col.key}>
+                  <label style={{ color: '#222' }}>{col.label}<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
                   <input
-                    name={col.key}
-                    value={form[col.key] ?? ""}
+                    name="fecha"
+                    type="date"
+                    value={form.fecha || ''}
                     onChange={handleChange}
-                    className={errors[col.key] ? "error" : ""}
-                    type={col.key === "price" ? "number" : col.key === "email" ? "email" : "text"}
-                    autoComplete="off"
+                    className={errors.fecha ? "error" : ""}
+                    required
                   />
-                  {errors[col.key] && (
+                  {errors.fecha && (
                     <div className="crud-modal-error" style={{
                       background: '#fff',
                       color: '#e63946',
@@ -231,13 +237,151 @@ export default function CrudTableModal({
                       fontSize: 15,
                       boxShadow: '0 2px 8px #e6394633',
                       letterSpacing: 0.2
-                    }}>{errors[col.key]}</div>
+                    }}>{errors.fecha}</div>
                   )}
-                </>
-              )}
-            </div>
-          ))}
-          {/* Campo contraseña (solo en crear usuario, usuarios) */}
+                </div>
+              );
+            }
+            if (endpointIsReserva() && col.key === 'hora') {
+              const generarHorasDisponibles = () => {
+                const horas = [];
+                for (let h = 13; h < 16; h++) {
+                  horas.push(`${h.toString().padStart(2, '0')}:00`);
+                  horas.push(`${h.toString().padStart(2, '0')}:30`);
+                }
+                for (let h = 20; h < 24; h++) {
+                  horas.push(`${h.toString().padStart(2, '0')}:00`);
+                  horas.push(`${h.toString().padStart(2, '0')}:30`);
+                }
+                return horas;
+              };
+              const horasDisponibles = generarHorasDisponibles();
+              return (
+                <div className="crud-modal-field" key={col.key}>
+                  <label style={{ color: '#222' }}>{col.label}<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
+                  <select
+                    name="hora"
+                    value={form.hora || ''}
+                    onChange={handleChange}
+                    className={errors.hora ? "error" : ""}
+                    required
+                  >
+                    <option value="">{form.hora ? `${form.hora}` : "Selecciona una hora"}</option>
+                    {horasDisponibles.map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  {errors.hora && (
+                    <div className="crud-modal-error" style={{
+                      background: '#fff',
+                      color: '#e63946',
+                      border: '2px solid #e63946',
+                      borderRadius: 8,
+                      padding: '7px 14px',
+                      marginTop: 6,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px #e6394633',
+                      letterSpacing: 0.2
+                    }}>{errors.hora}</div>
+                  )}
+                </div>
+              );
+            }
+            if (endpointIsReserva() && col.key === 'personas') {
+              return (
+                <div className="crud-modal-field" key={col.key}>
+                  <label style={{ color: '#222' }}>{col.label}<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
+                  <input
+                    name="personas"
+                    type="number"
+                    min={1}
+                    max={20}
+                    step={1}
+                    value={form.personas || 1}
+                    onChange={handleChange}
+                    className={errors.personas ? "error" : ""}
+                    required
+                  />
+                  {errors.personas && (
+                    <div className="crud-modal-error" style={{
+                      background: '#fff',
+                      color: '#e63946',
+                      border: '2px solid #e63946',
+                      borderRadius: 8,
+                      padding: '7px 14px',
+                      marginTop: 6,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px #e6394633',
+                      letterSpacing: 0.2
+                    }}>{errors.personas}</div>
+                  )}
+                </div>
+              );
+            }
+            if (columns.some(c => c.key === 'numero') && columns.some(c => c.key === 'productos') && col.key === 'productos') {
+              return (
+                <div className="crud-modal-field" key={col.key}>
+                  <label style={{ color: '#222' }}>{col.label || 'Productos'}<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
+                  <textarea
+                    name="productos"
+                    value={Array.isArray(form.productos) ? form.productos.join(', ') : (form.productos || '')}
+                    onChange={handleChange}
+                    className={errors.productos ? "error" : ""}
+                    required
+                    rows={3}
+                    placeholder="Lista de productos (separados por coma)"
+                  />
+                  {errors.productos && (
+                    <div className="crud-modal-error" style={{
+                      background: '#fff',
+                      color: '#e63946',
+                      border: '2px solid #e63946',
+                      borderRadius: 8,
+                      padding: '7px 14px',
+                      marginTop: 6,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px #e6394633',
+                      letterSpacing: 0.2
+                    }}>{errors.productos}</div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <div className="crud-modal-field" key={col.key}>
+                <label style={{ color: '#222' }}>
+                  {col.label}
+                  <span style={{ color: '#e63946', marginLeft: 4 }}>*</span>
+                </label>
+                <input
+                  name={col.key}
+                  value={form[col.key] ?? ""}
+                  onChange={handleChange}
+                  className={errors[col.key] ? "error" : ""}
+                  type={col.key === "email" ? "email" : "text"}
+                  autoComplete="off"
+                  placeholder={col.label ? col.label : col.key}
+                />
+                {errors[col.key] && (
+                  <div className="crud-modal-error" style={{
+                    background: '#fff',
+                    color: '#e63946',
+                    border: '2px solid #e63946',
+                    borderRadius: 8,
+                    padding: '7px 14px',
+                    marginTop: 6,
+                    fontWeight: 700,
+                    fontSize: 15,
+                    boxShadow: '0 2px 8px #e6394633',
+                    letterSpacing: 0.2
+                  }}>{errors[col.key]}</div>
+                )}
+              </div>
+            );
+          })}
           {!isEdit && !endpointIsReserva() && !endpointIsProducto() && (
             <div className="crud-modal-field">
               <label style={{ color: '#222' }}>Contraseña<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
@@ -250,6 +394,7 @@ export default function CrudTableModal({
                   className={errors.password ? "error" : ""}
                   autoComplete="new-password"
                   style={{ width: '100%', paddingRight: 38 }}
+                  placeholder="Contraseña"
                 />
                 <button
                   type="button"
@@ -276,14 +421,13 @@ export default function CrudTableModal({
                   <img src={showPassword ? eyeOffIcon : eyeIcon} alt={showPassword ? 'Ocultar' : 'Mostrar'} style={{ width: 22, height: 22, opacity: 0.85, filter: 'invert(27%) sepia(86%) saturate(749%) hue-rotate(-10deg) brightness(95%) contrast(95%)' }} />
                 </button>
               </div>
-              {/* Barra de fuerza visual progresiva */}
               <div style={{ width: '100%', display: 'flex', gap: 6, margin: '8px 0 2px 0', height: 7 }}>
                 {(() => {
                   const pwd = form.password || "";
                   const checks = [
-                    /[A-Z]/.test(pwd), // mayúscula
-                    /\d/.test(pwd),   // número
-                    /[^A-Za-z0-9]/.test(pwd), // símbolo
+                    /[A-Z]/.test(pwd),
+                    /\d/.test(pwd),
+                    /[^A-Za-z0-9]/.test(pwd),
                     pwd.length >= 7
                   ];
                   const passed = checks.filter(Boolean).length;
@@ -317,7 +461,6 @@ export default function CrudTableModal({
               )}
             </div>
           )}
-          {/* Confirmar contraseña (solo en crear usuario, usuarios) */}
           {!isEdit && !endpointIsReserva() && !endpointIsProducto() && (
             <div className="crud-modal-field">
               <label style={{ color: '#222' }}>Confirmar contraseña<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
@@ -330,6 +473,7 @@ export default function CrudTableModal({
                   className={errors.confirmPassword ? "error" : ""}
                   autoComplete="new-password"
                   style={{ width: '100%', paddingRight: 38 }}
+                  placeholder="Confirmar contraseña"
                 />
                 <button
                   type="button"
@@ -372,8 +516,7 @@ export default function CrudTableModal({
               )}
             </div>
           )}
-          {/* Campo rol al final, solo en crear usuario, usuarios */}
-          {!isEdit && !endpointIsReserva() && !endpointIsProducto() && (
+          {!endpointIsReserva() && !endpointIsProducto() && (
             <div className="crud-modal-field">
               <label style={{ color: '#222' }}>Rol<span style={{ color: '#e63946', marginLeft: 4 }}>*</span></label>
               <select
@@ -382,9 +525,9 @@ export default function CrudTableModal({
                 onChange={handleChange}
                 className={errors.rol ? "error" : ""}
               >
-                <option value="cliente">cliente</option>
-                <option value="admin">admin</option>
-                <option value="empleado">empleado</option>
+                <option value="cliente">Cliente</option>
+                <option value="admin">Administrador</option>
+                <option value="empleado">Empleado</option>
               </select>
               {errors.rol && (
                 <div className="crud-modal-error" style={{

@@ -54,6 +54,37 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.scroll-reservas {
+  /* El div de scroll ocupa todo el ancho menos la barra, y la barra queda pegada al borde derecho del contenedor calendar-container */
+  width: calc(100% + 28px); /* Más ancho para empujar la barra más a la derecha */
+  margin-right: -58px; /* Saca la barra más a la derecha, pero sigue dentro del borde */
+  box-sizing: content-box;
+}
+.scroll-reservas::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-reservas::-webkit-scrollbar-thumb {
+  background: #e63946;
+  border-radius: 8px;
+}
+.scroll-reservas::-webkit-scrollbar-track {
+  background: #ffeaea;
+  border-radius: 8px;
+}
+
+.calendar-container::-webkit-scrollbar {
+  width: 8px;
+  /* Elimina height personalizado para que la barra ocupe todo el alto del área scrollable */
+}
+.calendar-container::-webkit-scrollbar-thumb {
+  background: #e63946;
+  border-radius: 28px; /* Igual que el borde del contenedor para que se funda visualmente */
+}
+.calendar-container::-webkit-scrollbar-track {
+  background: #ffeaea;
+  border-radius: 28px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

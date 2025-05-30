@@ -5,7 +5,8 @@ CREATE TABLE users (
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   rol ENUM('cliente','admin','empleado') DEFAULT 'cliente',
-  fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP
+  fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fotoPerfil VARCHAR(255) DEFAULT NULL
 );
 
 -- Tabla de productos

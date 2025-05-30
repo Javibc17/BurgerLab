@@ -1,7 +1,5 @@
-// 1. Imports
 import React from "react";
 
-// 2. Componente principal
 function Footer() {
   return (
     <footer className="footer">
@@ -15,12 +13,10 @@ function Footer() {
 
         <section className="footer-section">
           <h4>Enlaces importantes</h4>
-          <ul>
-            <li><a href="#inicio">Inicio</a></li>
-            <li><a href="#sobre-nosotros">Sobre nosotros</a></li>
-            <li><a href="#productos">Servicios / Productos</a></li>
-            <li><a href="#contacto">Contacto</a></li>
-            <li><a href="#faq">Preguntas frecuentes</a></li>
+          <ul style={{ fontWeight: 'normal' }}>
+            <li><a href="#inicio">Menú</a></li>
+            <li><a href="#reservas">Reservas</a></li>
+            <li><a href="#mis-pedidos">Último pedido</a></li>
           </ul>
         </section>
 
@@ -50,5 +46,4 @@ function Footer() {
   );
 }
 
-// 3. Export
 export default Footer;

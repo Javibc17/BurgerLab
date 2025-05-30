@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from '../api';
+import EstadisticasCharts from './EstadisticasCharts';
 
 function AdminPanel({ tabDefault }) {
   const [tab, setTab] = useState(tabDefault || 'usuarios');
@@ -34,14 +35,16 @@ function AdminPanel({ tabDefault }) {
     }
   }, [tab]);
 
-  // Si se usa como CRUD individual, ocultar los tabs y mostrar solo la tabla correspondiente
   const showTabs = !tabDefault;
 
   return (
     <div style={{ padding: 40 }}>
       {loading && <div style={{textAlign:'center',margin:30}}>Cargando...</div>}
       {error && <div style={{color:'#e63946',textAlign:'center',margin:30}}>{error}</div>}
-      {/* CRUD USUARIOS */}
+      <div>
+        <h2 style={{color:'#e63946',textAlign:'center'}}>Estadísticas</h2>
+        <EstadisticasCharts usuarios={usuarios} tickets={tickets} reservas={reservas} />
+      </div>
       {tab === 'usuarios' && !loading && (
         <div>
           <h2 style={{color:'#e63946',textAlign:'center'}}>Usuarios</h2>
@@ -69,7 +72,6 @@ function AdminPanel({ tabDefault }) {
           </table>
         </div>
       )}
-      {/* CRUD RESERVAS */}
       {tab === 'reservas' && !loading && (
         <div>
           <h2 style={{color:'#e63946',textAlign:'center'}}>Reservas</h2>
@@ -92,7 +94,7 @@ function AdminPanel({ tabDefault }) {
                   <td style={{padding:8,border:'1px solid #e63946'}}>{r.id}</td>
                   <td style={{padding:8,border:'1px solid #e63946'}}>{r.nombre}</td>
                   <td style={{padding:8,border:'1px solid #e63946'}}>{r.email}</td>
-                  <td style={{padding:8,border:'1px solid #e63946'}}>{r.fecha ? new Date(r.fecha).toLocaleDateString('es-ES') : ''}</td>
+                  <td style={{padding:8,border:'1px solid #e63946'}}>{r.fecha || ''}</td>
                   <td style={{padding:8,border:'1px solid #e63946'}}>{r.hora ? r.hora.slice(0,5) : ''}</td>
                   <td style={{padding:8,border:'1px solid #e63946'}}>{r.personas}</td>
                   <td style={{padding:8,border:'1px solid #e63946'}}>{r.comentario}</td>
@@ -103,7 +105,6 @@ function AdminPanel({ tabDefault }) {
           </table>
         </div>
       )}
-      {/* CRUD PEDIDOS */}
       {tab === 'tickets' && !loading && (
         <div>
           <h2 style={{color:'#e63946',textAlign:'center'}}>Pedidos</h2>

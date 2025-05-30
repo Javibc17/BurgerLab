@@ -5,6 +5,8 @@ import logoSolo from './assets/logo.png';
 import logo from './assets/logoLetrasRojo.png';
 import eyeOff from './assets/proicons--eye-off.svg';
 import eyeOn from './assets/proicons--eye.svg';
+import { validarEmail } from './utils/validaciones';
+import { EXITOS } from './utils/exitos';
 
 function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
   const [email, setEmail] = useState("");
@@ -16,12 +18,8 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
   const [showPassword, setShowPassword] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [pendingUser, setPendingUser] = useState(null); // Nuevo estado
+  const [pendingUser, setPendingUser] = useState(null);
   const mensajeTimeoutRef = React.useRef();
-
-  const validarEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
 
   React.useEffect(() => {
     if (mensaje) {
@@ -61,7 +59,7 @@ function LoginPage({ onLogin, mensajeProp = "", setMensajeProp }) {
       setLoading(false);
       setShowSuccessModal(true);
       setMensaje("");
-      setPendingUser(res.data); // Guardar usuario pendiente
+      setPendingUser(res.data);
     } catch (err) {
       setLoading(false);
       const msg = err.response?.data?.error || "Error de inicio de sesión";

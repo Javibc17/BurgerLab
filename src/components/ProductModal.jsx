@@ -1,8 +1,6 @@
-// 1. Imports
 import React from "react";
 import "../App.css";
 
-// 2. Componente principal
 function ProductModal({ product, onClose, onAddToPedido }) {
   if (!product) return null;
   return (
@@ -39,8 +37,8 @@ function ProductModal({ product, onClose, onAddToPedido }) {
                         <h3 className="modal-section-title">Fórmula</h3>
                         <p className="modal-desc-text">{block.replace(/^F[óo]rmula:\s*/i, '')}</p>
                         {isLast && (
-                          <div className="modal-bottom-row modal-bottom-row-horizontal">
-                            <span className="modal-price modal-price-v2">{product.price}</span>
+                          <div className="modal-bottom-row modal-bottom-row-horizontal" style={{gap: 16}}>
+                            <span className="modal-price modal-price-v2">{String(product.price).includes('€') ? product.price : `${product.price} €`}</span>
                             <button
                               className="modal-add-btn ver-pedido-btn-destacado"
                               style={{
@@ -86,8 +84,8 @@ function ProductModal({ product, onClose, onAddToPedido }) {
                     return (
                       <div key={i}>
                         <p className="modal-desc-text">{block}</p>
-                        <div className="modal-bottom-row modal-bottom-row-horizontal">
-                          <span className="modal-price modal-price-v2">{product.price}</span>
+                        <div className="modal-bottom-row modal-bottom-row-horizontal" style={{gap: 16}}>
+                          <span className="modal-price modal-price-v2">{String(product.price).includes('€') ? product.price : `${product.price} €`}</span>
                           <button
                             className="modal-add-btn ver-pedido-btn-destacado"
                             style={{
@@ -132,7 +130,6 @@ function ProductModal({ product, onClose, onAddToPedido }) {
                 })}
               </div>
             )}
-            {/* Si el producto es entrante o postre y no tiene descripción detallada, mostrar aquí */}
             {((product && (product.categoria === 'entrantes' || product.categoria === 'postres')) && !product.description) && (
               <div className="modal-desc-block-v2">
                 <p className="modal-desc-text" style={{ fontSize: '1.08rem', color: '#b03535', marginBottom: 12 }}>
@@ -158,5 +155,4 @@ function ProductModal({ product, onClose, onAddToPedido }) {
   );
 }
 
-// 3. Export
 export default ProductModal;
